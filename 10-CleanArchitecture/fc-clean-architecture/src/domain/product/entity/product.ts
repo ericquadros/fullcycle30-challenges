@@ -12,10 +12,6 @@ export default class Product extends Entity {
     this._name = name;
     this._price = price;
     this.validate();
-    
-    if (this.notification.hasErrors()) {
-      throw new NotificationError(this.notification.getErrors());
-    }
   }
 
   get name(): string {
@@ -36,7 +32,10 @@ export default class Product extends Entity {
     this.validate();
   }
 
-  validate(): void {
+  private validate(): void {
     ProductValidatorFactory.create().validate(this);
+    if (this.notification.hasErrors()) {
+      throw new NotificationError(this.notification.getErrors());
+    }
   }
 }

@@ -1,0 +1,5 @@
+### Buscar todos os produtos
+GET http://localhost:3000/products
+
+### Buscar produto por ID
+GET http://localhost:3000/products/123 

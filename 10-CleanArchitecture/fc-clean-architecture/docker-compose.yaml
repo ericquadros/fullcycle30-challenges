@@ -1,0 +1,32 @@
+version: '3.8'
+
+services: 
+
+  db:
+    image: mysql:8
+    container_name: db
+    restart: always
+    tty: true
+    volumes: 
+      - ./mysql:/var/lib/mysql
+    environment: 
+      - MYSQL_DATABASE=nodedb
+      - MYSQL_ROOT_PASSWORD=root
+      - MYSQL_USER=user
+      - MYSQL_PASSWORD=userpass
+      - DB_HOST=db
+    ports:
+      - "3306:3306"
+    networks: 
+      - node-network
+    command: --default-authentication-plugin=mysql_native_password
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p$$MYSQL_ROOT_PASSWORD"]
+      interval: 10s
+      retries: 5
+      start_period: 30s
+      timeout: 5s
+
+networks: 
+  node-network:
+    driver: bridge

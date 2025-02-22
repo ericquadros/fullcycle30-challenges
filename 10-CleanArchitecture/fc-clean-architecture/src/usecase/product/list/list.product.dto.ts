@@ -1,5 +1,7 @@
 export interface OutputListProductDTO {
-  id: string;
-  name: string;
-  price: number;
+  products: {
+    id: string;
+    name: string;
+    price: number;
+  }[];
 } 

@@ -34,7 +34,7 @@ describe("Test list product use case", () => {
 
     const output = await usecase.execute();
 
-    expect(output).toEqual([
+    expect(output.products).toEqual([
       { id: "123", name: "Product 1", price: 100 },
       { id: "456", name: "Product 2", price: 200 },
     ]);

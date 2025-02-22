@@ -1,0 +1,61 @@
+### Produtos ###
+
+### Listar Produtos (JSON)
+GET http://localhost:3000/products HTTP/1.1
+Accept: application/json
+
+###
+
+### Listar Produtos (XML)
+GET http://localhost:3000/products HTTP/1.1
+Accept: application/xml
+
+###
+
+### Clientes ###
+
+### Listar Clientes (JSON)
+GET http://localhost:3000/customer HTTP/1.1
+Accept: application/json
+
+###
+
+### Listar Clientes (XML)
+GET http://localhost:3000/customer HTTP/1.1
+Accept: application/xml
+
+### Criar um novo cliente
+POST http://localhost:3000/customer
+Content-Type: application/json
+
+{
+    "name": "John",
+    "address": {
+        "street": "Street",
+        "city": "City",
+        "number": 123,
+        "zip": "12345"
+    }
+} 
+
+###
+
+### Testes de Erro ###
+
+### Teste de Rota Não Existente
+GET http://localhost:3000/non-existing-route HTTP/1.1
+Accept: application/json
+
+###
+
+### Teste de Formato Não Suportado
+GET http://localhost:3000/products HTTP/1.1
+Accept: application/yaml
+
+###
+
+### Teste de Formato Não Suportado para Clientes
+GET http://localhost:3000/customers HTTP/1.1
+Accept: application/yaml
+
+

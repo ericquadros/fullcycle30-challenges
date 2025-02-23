@@ -40,6 +40,7 @@ export default class PlaceOrderUseCase implements UseCaseInterface {
     if (!client) {
       throw new Error("Client not found");
     }
+    console.log('Cliente encontrado: ', client.name);
 
     // Valida produtos e estoque
     await Promise.all(
@@ -55,10 +56,14 @@ export default class PlaceOrderUseCase implements UseCaseInterface {
       })
     );
 
-    // Recupera os produtos do catálogo
+    console.log('Produtos validados: ', input.products?.length);
+
+    // Busca os produtos do catálogo
     const products = await Promise.all(
       input.products.map((p) => this._catalogFacade.find({ id: p.productId }))
     );
+
+    console.log('Produtos encontrados: ', input.products?.length);
 
     // Cria os itens do pedido
     const items = products.map((product, index) => {

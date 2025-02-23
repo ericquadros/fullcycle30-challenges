@@ -25,6 +25,7 @@ export default class StoreCatalogFacade implements StoreCatalogFacadeInterface {
   ): Promise<FindStoreCatalogFacadeOutputDto> {
     return await this._findUseCase.execute(id);
   }
+  
   async findAll(): Promise<FindAllStoreCatalogFacadeOutputDto> {
     return await this._findAllUseCase.execute();
   }

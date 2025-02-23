@@ -6,6 +6,10 @@ import ClientAdmFacadeFactory from "../modules/client-adm/factory/client-adm.fac
 import { CheckoutFacadeFactory } from "../modules/checkout/factory/checkout.factory";
 import { Sequelize } from "sequelize-typescript";
 import { ProductModel } from "../modules/product-adm/repository/product.model";
+import { ProductModel as ProductAdmModel } from "../modules/product-adm/repository/product.model";
+import ProductCatalogModel from "../modules/store-catalog/repository/product.model";
+
+
 import { ClientModel } from "../modules/client-adm/repository/client.model";
 import { InvoiceModel } from "../modules/invoice/repository/invoice.model";
 import { OrderModel } from "../modules/checkout/repository/order.model";
@@ -16,11 +20,15 @@ export const setupApp = async (): Promise<{ app: Express; sequelize: Sequelize }
   const sequelize = new Sequelize({
     dialect: "sqlite",
     storage: ":memory:",
-    logging: false,
+    logging: true, // Ativo temporariamente
   });
+
+  await sequelize.authenticate();
+  console.log('Database connected');
 
   sequelize.addModels([
     ProductModel,
+    // ProductCatalogModel,
     ClientModel,
     InvoiceModel,
     InvoiceItemModel,
@@ -28,6 +36,7 @@ export const setupApp = async (): Promise<{ app: Express; sequelize: Sequelize }
     OrderItemModel,
   ]);
   await sequelize.sync();
+  console.log('Database synced');
 
   const app = express();
   app.use(express.json());
@@ -55,6 +64,36 @@ export const setupApp = async (): Promise<{ app: Express; sequelize: Sequelize }
       res.status(500).json({ error: (err as Error).message });
     }
   });
+
+//   app.post("/checkout", async (req: Request, res: Response) => {
+//     try {
+//         console.log('Dados recebidos no checkout:', req.body);
+
+//         // Validação básica
+//         if (!req.body.clientId) {
+//           return res.status(400).json({ error: "ClientId is required" });
+//         }
+//         if (!Array.isArray(req.body.products) || req.body.products.length === 0) {
+//           return res.status(400).json({ error: "Products array is required and cannot be empty" });
+//         }
+        
+//         const checkoutFacade = CheckoutFacadeFactory.create();
+//         const output = await checkoutFacade.placeOrder(req.body);
+//         console.log('Resultado do checkout:', output);
+
+//         res.status(201).json(output);
+//     } catch (err) {
+//         console.error("Erro detalhado no checkout:", {
+//             message: (err as Error).message,
+//             stack: (err as Error).stack,
+//             data: req.body
+//         });
+//         res.status(500).json({ 
+//             error: (err as Error).message,
+//             stack: (err as Error).stack 
+//         });
+//     }
+// });
 
   // Checkout endpoint
   app.post("/checkout", async (req: Request, res: Response) => {

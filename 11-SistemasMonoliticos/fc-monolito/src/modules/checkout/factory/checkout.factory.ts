@@ -9,27 +9,38 @@ import CheckoutFacade from "../facade/checkout.facade";
 
 export class CheckoutFacadeFactory {
   static create() {
-    const orderRepository = new OrderRepository();
-    
-    const clientFacade = ClientAdmFacadeFactory.create();
-    const productFacade = ProductAdmFacadeFactory.create();
-    const catalogFacade = StoreCatalogFacadeFactory.create();
-    const invoiceFacade = InvoiceFacadeFactory.create();
-    const paymentFacade = PaymentFacadeFactory.create();
 
-    const placeOrderUseCase = new PlaceOrderUseCase(
-      clientFacade,
-      productFacade,
-      catalogFacade,
-      orderRepository,
-      invoiceFacade,
-      paymentFacade
-    );
+    try {
+      // Log das dependências sendo criadas
+      console.log('Creating CheckoutFacade dependencies...');
+      
+      const orderRepository = new OrderRepository();
+      
+      const clientFacade = ClientAdmFacadeFactory.create();
+      const productFacade = ProductAdmFacadeFactory.create();
+      const catalogFacade = StoreCatalogFacadeFactory.create();
+      const invoiceFacade = InvoiceFacadeFactory.create();
+      const paymentFacade = PaymentFacadeFactory.create();
 
-    const facade = new CheckoutFacade({
-      placeOrderUseCase: placeOrderUseCase,
-    });
+      const placeOrderUseCase = new PlaceOrderUseCase(
+        clientFacade,
+        productFacade,
+        catalogFacade,
+        orderRepository,
+        invoiceFacade,
+        paymentFacade
+      );
 
-    return facade;
+      const facade = new CheckoutFacade({
+        placeOrderUseCase: placeOrderUseCase,
+      });
+
+      console.log('CheckoutFacade created successfully');
+      return facade;
+      
+    } catch (error) {
+        console.error('Error creating CheckoutFacade:', error);
+        throw error;
+    }
   }
 } 

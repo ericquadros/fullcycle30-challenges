@@ -5,14 +5,19 @@ import CheckStockUseCase from "../usecase/check-stock/check-stock.usecase";
 
 export default class ProductAdmFacadeFactory {
   static create() {
-    const productRepository = new ProductRepository();
-    const addProductUseCase = new AddProductUseCase(productRepository);
-    const checkStockUseCase = new CheckStockUseCase(productRepository);
-    const productFacade = new ProductAdmFacade({
-      addUseCase: addProductUseCase,
-      stockUseCase: checkStockUseCase,
-    });
-
-    return productFacade;
+    try {
+      const productRepository = new ProductRepository();      
+      const addProductUseCase = new AddProductUseCase(productRepository);    
+      const checkStockUseCase = new CheckStockUseCase(productRepository);      
+      const productFacade = new ProductAdmFacade({
+        addUseCase: addProductUseCase,
+        stockUseCase: checkStockUseCase,
+      });
+      return productFacade;
+      
+    } catch (error) {
+      console.error('Error in ProductAdmFacadeFactory.create():', error);
+      throw error;
+    }
   }
 }

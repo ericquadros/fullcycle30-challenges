@@ -7,8 +7,7 @@ import { CheckoutFacadeFactory } from "../modules/checkout/factory/checkout.fact
 import { Sequelize } from "sequelize-typescript";
 import { ProductModel } from "../modules/product-adm/repository/product.model";
 import { ProductModel as ProductAdmModel } from "../modules/product-adm/repository/product.model";
-import ProductCatalogModel from "../modules/store-catalog/repository/product.model";
-
+import StoreCatalogProductModel from "../modules/store-catalog/repository/product.model";
 
 import { ClientModel } from "../modules/client-adm/repository/client.model";
 import { InvoiceModel } from "../modules/invoice/repository/invoice.model";
@@ -28,7 +27,7 @@ export const setupApp = async (): Promise<{ app: Express; sequelize: Sequelize }
 
   sequelize.addModels([
     ProductModel,
-    // ProductCatalogModel,
+    StoreCatalogProductModel,
     ClientModel,
     InvoiceModel,
     InvoiceItemModel,

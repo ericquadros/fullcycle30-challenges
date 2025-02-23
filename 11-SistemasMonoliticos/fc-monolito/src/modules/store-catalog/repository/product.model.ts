@@ -1,7 +1,7 @@
 import { Column, Model, PrimaryKey, Table } from "sequelize-typescript";
 
 @Table({
-  tableName: "store_catalog_products",
+  tableName: "products",
   timestamps: false,
 })
 export default class StoreCatalogProductModel extends Model {
@@ -17,4 +17,15 @@ export default class StoreCatalogProductModel extends Model {
 
   @Column({ allowNull: false })
   purchasePrice: number;
+
+  // Campos que não usamos nesta perspectiva, deste módulo, 
+  // mas é necessário declarar para o sequelize funcionar corretamente
+  @Column({ allowNull: false })
+  stock: number;
+
+  @Column({ allowNull: false })
+  createdAt: Date;
+
+  @Column({ allowNull: false })
+  updatedAt: Date;
 }

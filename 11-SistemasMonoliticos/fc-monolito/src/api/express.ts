@@ -5,41 +5,49 @@ import InvoiceFacadeFactory from "../modules/invoice/factory/invoice.factory";
 import ClientAdmFacadeFactory from "../modules/client-adm/factory/client-adm.facade.factory";
 import { CheckoutFacadeFactory } from "../modules/checkout/factory/checkout.factory";
 import { Sequelize } from "sequelize-typescript";
-import { ProductModel } from "../modules/product-adm/repository/product.model";
-import { ProductModel as ProductAdmModel } from "../modules/product-adm/repository/product.model";
-import StoreCatalogProductModel from "../modules/store-catalog/repository/product.model";
-
-import { ClientModel } from "../modules/client-adm/repository/client.model";
-import { InvoiceModel } from "../modules/invoice/repository/invoice.model";
-import { OrderModel } from "../modules/checkout/repository/order.model";
-import OrderItemModel from "../modules/checkout/repository/order-item.model";
-import InvoiceItemModel from "../modules/invoice/repository/invoice-item.model";
+import { ProductAdmSequelizeFactory } from "../modules/product-adm/repository/sequelize.factory";
+import { StoreCatalogSequelizeFactory } from "../modules/store-catalog/repository/sequelize.factory";
+import { ClientAdmSequelizeFactory } from "../modules/client-adm/repository/sequelize.factory";
+import { InvoiceSequelizeFactory } from "../modules/invoice/repository/sequelize.factory";
+import { CheckoutSequelizeFactory } from "../modules/checkout/repository/sequelize.factory";
+import { PaymentSequelizeFactory } from "../modules/payment/repository/sequelize.factory";
+import { SharedSequelizeFactory } from "../modules/@shared/database/sequelize.factory";
 
 export const setupApp = async (): Promise<{ app: Express; sequelize: Sequelize }> => {
-  const sequelize = new Sequelize({
-    dialect: "sqlite",
-    storage: ":memory:",
-    logging: true, // Ativo temporariamente
-  });
-
-  await sequelize.authenticate();
-  console.log('Database connected');
-
-  sequelize.addModels([
-    ProductModel,
-    StoreCatalogProductModel,
-    ClientModel,
-    InvoiceModel,
-    InvoiceItemModel,
-    OrderModel,
-    OrderItemModel,
-  ]);
-  await sequelize.sync();
-  console.log('Database synced');
-
   const app = express();
   app.use(express.json());
 
+  try {
+    console.log('Initializing database connections...');
+    
+    // Inicialize todas as factories dos módulos
+    // Aqui a ideia foi de criar uma instancia de sequelize para cada módulo
+    // Para evitar problemas de utilização com o mesmo banco de dados e facilitar o desacoplamento
+    await Promise.all([
+      ProductAdmSequelizeFactory.getInstance(),
+      StoreCatalogSequelizeFactory.getInstance(),
+      ClientAdmSequelizeFactory.getInstance(),
+      InvoiceSequelizeFactory.getInstance(),
+      CheckoutSequelizeFactory.getInstance(),
+      PaymentSequelizeFactory.getInstance(),
+    ]);
+
+    console.log('All database connections established');
+
+    // Setup routes
+    setupRoutes(app);
+
+    // Retorne a instância compartilhada do Sequelize
+    const sequelize = await SharedSequelizeFactory.getInstance();
+    return { app, sequelize };
+    
+  } catch (error) {
+    console.error('Error during setup:', error);
+    throw error;
+  }
+};
+
+function setupRoutes(app: Express) {
   // Product endpoint
   app.post("/products", async (req: Request, res: Response) => {
     try {
@@ -64,36 +72,6 @@ export const setupApp = async (): Promise<{ app: Express; sequelize: Sequelize }
     }
   });
 
-//   app.post("/checkout", async (req: Request, res: Response) => {
-//     try {
-//         console.log('Dados recebidos no checkout:', req.body);
-
-//         // Validação básica
-//         if (!req.body.clientId) {
-//           return res.status(400).json({ error: "ClientId is required" });
-//         }
-//         if (!Array.isArray(req.body.products) || req.body.products.length === 0) {
-//           return res.status(400).json({ error: "Products array is required and cannot be empty" });
-//         }
-        
-//         const checkoutFacade = CheckoutFacadeFactory.create();
-//         const output = await checkoutFacade.placeOrder(req.body);
-//         console.log('Resultado do checkout:', output);
-
-//         res.status(201).json(output);
-//     } catch (err) {
-//         console.error("Erro detalhado no checkout:", {
-//             message: (err as Error).message,
-//             stack: (err as Error).stack,
-//             data: req.body
-//         });
-//         res.status(500).json({ 
-//             error: (err as Error).message,
-//             stack: (err as Error).stack 
-//         });
-//     }
-// });
-
   // Checkout endpoint
   app.post("/checkout", async (req: Request, res: Response) => {
     try {
@@ -116,6 +94,4 @@ export const setupApp = async (): Promise<{ app: Express; sequelize: Sequelize }
       res.status(404).json({ error: (err as Error).message });
     }
   });
-
-  return { app, sequelize };
-}; 
+} 

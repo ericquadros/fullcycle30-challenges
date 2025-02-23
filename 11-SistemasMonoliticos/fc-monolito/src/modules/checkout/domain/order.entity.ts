@@ -1,11 +1,16 @@
 import BaseEntity from "../../@shared/domain/entity/base.entity";
 import Id from "../../@shared/domain/value-object/id.value-object";
-import OrderItem from "./order-item.entity";
 
 type OrderProps = {
   id?: Id;
   clientId: string;
-  items: OrderItem[];
+  items: {
+    id?: Id;
+    productId: string;
+    name: string;
+    price: number;
+    quantity: number;
+  }[];
   status?: string;
   createdAt?: Date;
   updatedAt?: Date;
@@ -19,7 +24,7 @@ export default class Order extends BaseEntity {
   constructor(props: OrderProps) {
     super(props.id);
     this._clientId = props.clientId;
-    this._items = props.items;
+    this._items = props.items.map((item) => new OrderItem(item));
     this._status = props.status || "pending";
     this.validate();
   }
@@ -45,6 +50,10 @@ export default class Order extends BaseEntity {
     return this._status;
   }
 
+  set status(status: string) {
+    this._status = status;
+  }
+
   get total(): number {
     return this._items.reduce((total, item) => {
       return total + item.price * item.quantity;
@@ -57,5 +66,46 @@ export default class Order extends BaseEntity {
 
   decline(): void {
     this._status = "declined";
+  }
+}
+
+type OrderItemProps = {
+  id?: Id;
+  productId: string;
+  name: string;
+  price: number;
+  quantity: number;
+  createdAt?: Date;
+  updatedAt?: Date;
+};
+
+class OrderItem extends BaseEntity {
+  private _productId: string;
+  private _name: string;
+  private _price: number;
+  private _quantity: number;
+
+  constructor(props: OrderItemProps) {
+    super(props.id);
+    this._productId = props.productId;
+    this._name = props.name;
+    this._price = props.price;
+    this._quantity = props.quantity;
+  }
+
+  get productId(): string {
+    return this._productId;
+  }
+
+  get name(): string {
+    return this._name;
+  }
+
+  get price(): number {
+    return this._price;
+  }
+
+  get quantity(): number {
+    return this._quantity;
   }
 } 

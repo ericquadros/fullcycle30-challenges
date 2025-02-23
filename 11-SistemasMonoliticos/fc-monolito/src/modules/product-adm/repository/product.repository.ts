@@ -1,12 +1,19 @@
 import Id from "../../@shared/domain/value-object/id.value-object";
 import Product from "../domain/product.entity";
 import ProductGateway from "../gateway/product.gateway";
-import { ProductModel as ProductAdmModel } from "./product.model"; 
+import { ProductModel } from "./product.model";
+import { ProductAdmSequelizeFactory } from "./sequelize.factory";
 
 export default class ProductRepository implements ProductGateway {
+  private async getModel(): Promise<typeof ProductModel> {
+    const sequelize = await ProductAdmSequelizeFactory.getInstance();
+    return ProductModel;
+  }
+
   async add(product: Product): Promise<void> {
+    const ProductModel = await this.getModel();
     try {
-      console.log('Creating product with data:', {
+      console.log('ProductAdm - Creating product with data:', {
         id: product.id.id,
         name: product.name,
         description: product.description,
@@ -14,7 +21,7 @@ export default class ProductRepository implements ProductGateway {
         stock: product.stock,
       });
 
-      await ProductAdmModel.create({
+      await ProductModel.create({
         id: product.id.id,
         name: product.name,
         description: product.description,
@@ -24,15 +31,16 @@ export default class ProductRepository implements ProductGateway {
         updatedAt: new Date(),
       });
       
-      console.log('Product created successfully');
+      console.log('ProductAdm - Product created successfully with id:', product.id.id);
     } catch (error) {
-      console.error('Error creating product:', error);
+      console.error('ProductAdm - Error creating product:', error);
       throw error;
     }
   }
 
   async find(id: string): Promise<Product> {
-    const product = await ProductAdmModel.findOne({
+    const ProductModel = await this.getModel();
+    const product = await ProductModel.findOne({
       where: { id },
     });
 

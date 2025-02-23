@@ -4,28 +4,47 @@ import OrderItem from "../domain/order-item.entity";
 import CheckoutGateway from "../gateway/checkout.gateway";
 import { OrderModel } from "./order.model";
 import OrderItemModel from "./order-item.model";
+import { CheckoutSequelizeFactory } from "./sequelize.factory";
 
 export default class OrderRepository implements CheckoutGateway {
   async addOrder(order: Order): Promise<void> {
-    await OrderModel.create(
-      {
+    try {
+      console.log('Creating order with data:', {
         id: order.id.id,
         clientId: order.clientId,
-        status: order.status,
-        items: order.items.map((item) => ({
+        items: order.items.map(item => ({
           id: item.id.id,
           productId: item.productId,
           quantity: item.quantity,
           price: item.price,
-          orderId: order.id.id,
         })),
-        createdAt: order.createdAt,
-        updatedAt: order.updatedAt,
-      },
-      {
-        include: [{ model: OrderItemModel }],
-      }
-    );
+      });
+
+      const orderModel = await OrderModel.create(
+        {
+          id: order.id.id,
+          clientId: order.clientId,
+          status: order.status,
+          createdAt: order.createdAt,
+          updatedAt: order.updatedAt,
+          items: order.items.map((item) => ({
+            id: item.id.id,
+            productId: item.productId,
+            quantity: item.quantity,
+            price: item.price || 0,
+            orderId: order.id.id,
+          })),
+        },
+        {
+          include: [{ model: OrderItemModel }],
+        }
+      );
+
+      console.log('Order created successfully:', orderModel.toJSON());
+    } catch (error) {
+      console.error('Error creating order:', error);
+      throw error;
+    }
   }
 
   async findOrder(id: string): Promise<Order> {

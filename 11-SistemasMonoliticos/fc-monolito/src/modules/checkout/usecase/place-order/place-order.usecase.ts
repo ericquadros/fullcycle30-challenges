@@ -6,128 +6,124 @@ import PaymentFacadeInterface from "../../../payment/facade/facade.interface";
 import ProductAdmFacadeInterface from "../../../product-adm/facade/product-adm.facade.interface";
 import StoreCatalogFacadeInterface from "../../../store-catalog/facade/store-catalog.facade.interface";
 import Order from "../../domain/order.entity";
-import OrderItem from "../../domain/order-item.entity";
 import CheckoutGateway from "../../gateway/checkout.gateway";
 import { PlaceOrderInputDto, PlaceOrderOutputDto } from "./place-order.dto";
 
 export default class PlaceOrderUseCase implements UseCaseInterface {
-  private _clientFacade: ClientAdmFacadeInterface;
-  private _productFacade: ProductAdmFacadeInterface;
-  private _catalogFacade: StoreCatalogFacadeInterface;
-  private _repository: CheckoutGateway;
-  private _invoiceFacade: InvoiceFacadeInterface;
-  private _paymentFacade: PaymentFacadeInterface;
-
   constructor(
-    clientFacade: ClientAdmFacadeInterface,
-    productFacade: ProductAdmFacadeInterface,
-    catalogFacade: StoreCatalogFacadeInterface,
-    repository: CheckoutGateway,
-    invoiceFacade: InvoiceFacadeInterface,
-    paymentFacade: PaymentFacadeInterface
-  ) {
-    this._clientFacade = clientFacade;
-    this._productFacade = productFacade;
-    this._catalogFacade = catalogFacade;
-    this._repository = repository;
-    this._invoiceFacade = invoiceFacade;
-    this._paymentFacade = paymentFacade;
-  }
+    private _clientFacade: ClientAdmFacadeInterface,
+    private _productFacade: ProductAdmFacadeInterface,
+    private _catalogFacade: StoreCatalogFacadeInterface,
+    private _repository: CheckoutGateway,
+    private _invoiceFacade: InvoiceFacadeInterface,
+    private _paymentFacade: PaymentFacadeInterface
+  ) {}
 
   async execute(input: PlaceOrderInputDto): Promise<PlaceOrderOutputDto> {
-    // Busca o cliente
+    console.log('Executing PlaceOrderUseCase with input:', input);
+
+    // Validar cliente
     const client = await this._clientFacade.find({ id: input.clientId });
     if (!client) {
       throw new Error("Client not found");
     }
-    console.log('Cliente encontrado: ', client.name);
 
-    // Valida produtos e estoque
-    await Promise.all(
+    // Buscar e validar produtos
+    const products = await Promise.all(
       input.products.map(async (p) => {
-        const product = await this._productFacade.checkStock({
-          productId: p.productId,
-        });
-        if (product.stock < p.quantity) {
-          throw new Error(
-            `Product ${p.productId} is out of stock`
-          );
+        const product = await this._catalogFacade.find({ id: p.productId });
+        if (!product) {
+          throw new Error(`Product ${p.productId} not found`);
         }
+        return {
+          productId: p.productId,
+          name: product.name,
+          price: product.purchasePrice,
+          quantity: p.quantity,
+        };
       })
     );
 
-    console.log('Produtos validados: ', input.products?.length);
+    // Calcular total
+    const total = products.reduce((total, product) => {
+      return total + product.price * product.quantity;
+    }, 0);
 
-    // Busca os produtos do catálogo
-    const products = await Promise.all(
-      input.products.map((p) => this._catalogFacade.find({ id: p.productId }))
-    );
+    console.log('Calculated total:', total);
 
-    console.log('Produtos encontrados: ', input.products?.length);
-
-    // Cria os itens do pedido
-    const items = products.map((product, index) => {
-      return new OrderItem({
-        id: new Id(),
-        productId: product.id,
-        quantity: input.products[index].quantity,
-        price: product.price,
-      });
-    });
-
-    // Cria o pedido
+    // Criar pedido
     const order = new Order({
-      id: new Id(),
-      clientId: client.id,
-      items,
+      clientId: input.clientId,
+      items: products.map((p) => ({
+        productId: p.productId,
+        name: p.name,
+        price: p.price,
+        quantity: p.quantity,
+      })),
     });
 
-    // Processa o pagamento
+    // Processar pagamento
     const payment = await this._paymentFacade.process({
       orderId: order.id.id,
-      amount: order.total,
+      amount: total,
     });
 
-    // Atualiza o status do pedido baseado no pagamento
-    if (payment.status === "approved") {
-      order.approve();
-    } else {
-      order.decline();
-    }
+    console.log('Payment processed:', payment);
 
-    // Gera a invoice se aprovado
-    let invoice;
-    if (payment.status === "approved") {
-      invoice = await this._invoiceFacade.generate({
+    // Atualizar status do pedido baseado no pagamento
+    const status = payment.status === "approved" ? "approved" : "declined";
+    order.status = status;
+
+    // Salvar pedido
+    await this._repository.addOrder(order);
+
+    // Gerar invoice se aprovado
+    let invoiceId = null;
+    if (status === "approved") {
+      console.log('Generating invoice for client:', client);
+      
+      const invoice = await this._invoiceFacade.generate({
         name: client.name,
         document: client.document,
-        street: client.street,
-        number: client.number,
-        complement: client.complement,
-        city: client.city,
-        state: client.state,
-        zipCode: client.zipCode,
-        items: products.map((product, index) => ({
-          id: product.id,
-          name: product.name,
-          price: product.price * input.products[index].quantity,
+        street: client.street || "",        
+        number: client.number || "",        
+        complement: client.complement || "", 
+        city: client.city || "",           
+        state: client.state || "",         
+        zipCode: client.zipCode || "",     
+        items: products.map((p) => ({
+          id: p.productId,
+          name: p.name,
+          price: p.price,
         })),
       });
+      
+      console.log('Invoice generated:', invoice);
+      invoiceId = invoice.id;
     }
 
-    // Salva o pedido
-    await this._repository.addOrder(order);
+    console.log('Order processing completed:', {
+      id: order.id.id,
+      invoiceId,
+      status,
+      total,
+      products: order.items.map((item) => ({
+        productId: item.productId,
+        name: item.name,
+        quantity: item.quantity,
+      })),
+    });
 
     return {
       id: order.id.id,
-      invoiceId: invoice ? invoice.id : null,
-      status: order.status,
-      total: order.total,
-      products: products.map((product, index) => ({
-        productId: product.id,
-        name: product.name,
-        price: product.price,
-        quantity: input.products[index].quantity,
+      invoiceId,
+      status,
+      total,
+      products: order.items.map((item) => ({
+        productId: item.productId,
+        name: item.name,
+        price: item.price,
+        quantity: item.quantity,
       })),
     };
   }

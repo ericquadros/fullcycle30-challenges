@@ -1,5 +1,6 @@
 import request from "supertest";
-import { app } from "./express";
+import { setupApp } from "./express";
+import { Express } from "express";
 import { Sequelize } from "sequelize-typescript";
 import { ProductModel } from "../modules/product-adm/repository/product.model";
 import { ClientModel } from "../modules/client-adm/repository/client.model";
@@ -9,32 +10,17 @@ import OrderItemModel from "../modules/checkout/repository/order-item.model";
 import InvoiceItemModel from "../modules/invoice/repository/invoice-item.model";
 
 describe("E2E API Tests", () => {
+  let app: Express;
   let sequelize: Sequelize;
 
-  beforeAll(async () => {
-    sequelize = new Sequelize({
-      dialect: "sqlite",
-      storage: ":memory:",
-      logging: false,
-    });
-
-    await sequelize.addModels([
-      ProductModel,
-      ClientModel,
-      InvoiceModel,
-      InvoiceItemModel,
-      OrderModel,
-      OrderItemModel,
-    ]);
-    await sequelize.sync();
-  });
-
-  afterAll(async () => {
-    await sequelize.close();
-  });
-
   beforeEach(async () => {
-    await sequelize.sync({ force: true }); // Limpa o banco antes de cada teste
+    const setup = await setupApp();
+    app = setup.app;
+    sequelize = setup.sequelize;
+  });
+
+  afterEach(async () => {
+    await sequelize.close();
   });
 
   it("should create a product", async () => {

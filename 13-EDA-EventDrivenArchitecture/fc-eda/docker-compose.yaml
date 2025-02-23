@@ -2,12 +2,18 @@ version: '3'
 
 services:
   goapp: 
+    container_name: eda-goapp
     build: .
     platform: linux/amd64
     volumes:
       - .:/app
     ports:
-      - 8080:8080
+      - 8085:8080
+    networks:
+      - eda-network
+    depends_on:
+      - mysql
+      - kafka
 
   mysql:
     image: mysql:5.7
@@ -20,6 +26,8 @@ services:
       - 3306:3306
     volumes:
       - .docker/mysql:/var/lib/mysql
+    networks:
+      - eda-network
 
   zookeeper:
     image: "confluentinc/cp-zookeeper:6.1.0"
@@ -30,10 +38,12 @@ services:
       TZ: Sao_Paulo/Brazil
       ZOOKEEPER_CLIENT_PORT: 2181
       ZOOKEEPER_TICK_TIME: 2000
+    networks:
+      - eda-network
 
   kafka:
     image: "confluentinc/cp-enterprise-kafka:6.1.0"
-    container_name: kafka
+    container_name: eda-kafka
     depends_on:
       - zookeeper
     ports:
@@ -41,6 +51,7 @@ services:
     # Use kafka:29092 for connections internal on the docker network
     # See https://rmoff.net/2018/08/02/kafka-listeners-explained/ for details
       - '9092:9092'
+      - '29092:29092'
     environment:
       TZ: Sao_Paulo/Brazil
       KAFKA_BROKER_ID: 1
@@ -54,11 +65,13 @@ services:
       KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
       KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 100
       CONFLUENT_METRICS_ENABLE: 'false'
+    networks:
+      - eda-network
 
   control-center:
     image: confluentinc/cp-enterprise-control-center:7.3.0
     hostname: control-center
-    container_name: control-center
+    container_name: eda-control-center
     depends_on:
       - kafka
     ports:
@@ -70,9 +83,12 @@ services:
       CONTROL_CENTER_MONITORING_INTERCEPTOR_TOPIC_PARTITIONS: 1
       CONFLUENT_METRICS_TOPIC_REPLICATION: 1
       PORT: 9021
+    networks:
+      - eda-network
 
   balance-service:
     build: ./balance-service
+    container_name: eda-balance-service
     ports:
       - "3003:3003"
     depends_on:
@@ -82,9 +98,12 @@ services:
       - DATABASE_URL=postgres://user:password@postgres:5432/balance_db
       - KAFKA_BROKERS=kafka:29092
       - PORT=3003
+    networks:
+      - eda-network
 
   postgres:
     image: postgres:13
+    container_name: eda-postgres
     environment:
       - POSTGRES_USER=user
       - POSTGRES_PASSWORD=password
@@ -93,12 +112,14 @@ services:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
+    networks:
+      - eda-network
 
   kafka-ui:
-    image: provectus/kafka-ui:latest
-    container_name: kafka-ui
+    image: provectuslabs/kafka-ui:latest
+    container_name: eda-kafka-ui
     ports:
-      - "8080:8080"
+      - "8090:8080"
     depends_on:
       - kafka
       - zookeeper
@@ -106,6 +127,11 @@ services:
       KAFKA_CLUSTERS_0_NAME: local
       KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka:29092
       KAFKA_CLUSTERS_0_ZOOKEEPER: zookeeper:2181
+
+# Definição da rede
+networks:
+  eda-network:
+    driver: bridge
 
 volumes:
   postgres_data:

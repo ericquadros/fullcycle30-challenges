@@ -11,15 +11,14 @@ import InvoiceItemModel from "../modules/invoice/repository/invoice-item.model";
 describe("E2E API Tests", () => {
   let sequelize: Sequelize;
 
-  beforeEach(async () => {
+  beforeAll(async () => {
     sequelize = new Sequelize({
       dialect: "sqlite",
       storage: ":memory:",
       logging: false,
-      sync: { force: true },
     });
 
-    sequelize.addModels([
+    await sequelize.addModels([
       ProductModel,
       ClientModel,
       InvoiceModel,
@@ -30,8 +29,12 @@ describe("E2E API Tests", () => {
     await sequelize.sync();
   });
 
-  afterEach(async () => {
+  afterAll(async () => {
     await sequelize.close();
+  });
+
+  beforeEach(async () => {
+    await sequelize.sync({ force: true }); // Limpa o banco antes de cada teste
   });
 
   it("should create a product", async () => {
@@ -43,6 +46,10 @@ describe("E2E API Tests", () => {
         purchasePrice: 100,
         stock: 10,
       });
+
+    if (response.status !== 201) {
+      console.error("Response error:", response.body);
+    }
 
     expect(response.status).toBe(201);
     expect(response.body).toHaveProperty("id");
@@ -83,6 +90,8 @@ describe("E2E API Tests", () => {
         stock: 10,
       });
 
+    console.log('productResponse.status: ', productResponse.status);
+
     // Depois cria um cliente
     const clientResponse = await request(app)
       .post("/clients")
@@ -98,6 +107,8 @@ describe("E2E API Tests", () => {
         zipCode: "12345-678",
       });
 
+    console.log('clientResponse.status: ', clientResponse.status);
+
     // Finalmente cria o pedido
     const response = await request(app)
       .post("/checkout")
@@ -110,6 +121,10 @@ describe("E2E API Tests", () => {
           },
         ],
       });
+    
+    if (response.status !== 201) {
+      console.error("Response error:", response.body);
+    }
 
     expect(response.status).toBe(201);
     expect(response.body).toHaveProperty("id");

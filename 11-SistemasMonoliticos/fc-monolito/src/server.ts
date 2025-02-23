@@ -23,7 +23,7 @@ async function bootstrap() {
     InvoiceModel,
     InvoiceItemModel,
     OrderModel,
-    OrderItemModel,
+    OrderItemModel    
   ]);
   await sequelize.sync();
 

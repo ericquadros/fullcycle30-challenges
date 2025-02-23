@@ -38,6 +38,7 @@ app.post("/checkout", async (req: Request, res: Response) => {
     const output = await checkoutFacade.placeOrder(req.body);
     res.status(201).json(output);
   } catch (err) {
+    console.error("Error when creating an order:", err);
     res.status(500).json({ error: (err as Error).message });
   }
 });

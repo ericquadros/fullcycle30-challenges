@@ -26,7 +26,7 @@ describe("PaymentFacade test", () => {
     // const usecase = new ProcessPaymentUseCase(repository);
     // const facade = new PaymentFacade(usecase);
 
-    const facade = PaymentFacadeFactory.create();
+    const facade = await PaymentFacadeFactory.create();
 
     const input = {
       orderId: "order-1",

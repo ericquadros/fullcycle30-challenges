@@ -4,26 +4,28 @@ import Id from "../../@shared/domain/value-object/id.value-object";
 import Address from "./address.value-object";
 import InvoiceItems from "./invoice-items.entity";
 
+type InvoiceConstructorProps = {
+  id?: Id;
+  name: string;
+  document: string;
+  address: Address;
+  items: InvoiceItems[];
+  createdAt?: Date;
+  updatedAt?: Date;
+};
+
 export default class Invoice extends BaseEntity implements AggregateRoot {
   private _name: string;
   private _document: string;
   private _address: Address;
   private _items: InvoiceItems[];
   
-  constructor(
-    id?: Id,
-    name?: string,
-    document?: string,
-    address?: Address,
-    items?: InvoiceItems[],
-    createdAt?: Date,
-    updatedAt?: Date
-  ) {
-    super(id, createdAt, updatedAt);
-    this._name = name || "";
-    this._document = document || "";
-    this._address = address || new Address("", "", "", "", "", "");
-    this._items = items || [];
+  constructor(props: InvoiceConstructorProps) {
+    super(props.id, props.createdAt, props.updatedAt);
+    this._name = props.name;
+    this._document = props.document;
+    this._address = props.address;
+    this._items = props.items;
   }
 
   get name(): string {

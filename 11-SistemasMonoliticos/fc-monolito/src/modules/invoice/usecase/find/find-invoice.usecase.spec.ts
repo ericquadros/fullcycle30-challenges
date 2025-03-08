@@ -4,16 +4,28 @@ import Invoice from "../../domain/invoice.entity";
 import InvoiceItems from "../../domain/invoice-items.entity";
 import FindInvoiceUseCase from "./find-invoice.usecase";
 
-const invoice = new Invoice(
-  new Id("1"),
-  "Invoice 1",
-  "Document 1",
-  new Address("Street 1", "123", "Complement", "City", "State", "12345-678"),
-  [
-    new InvoiceItems(new Id("1"), "Item 1", 100),
-    new InvoiceItems(new Id("2"), "Item 2", 200),
-  ]
-);
+const address = new Address("Street 1", "123", "Complement", "City", "State", "12345-678");
+
+const items = [
+  new InvoiceItems({
+    id: new Id("1"),
+    name: "Item 1",
+    price: 100,
+  }),
+  new InvoiceItems({
+    id: new Id("2"),
+    name: "Item 2",
+    price: 200,
+  }),
+];
+
+const invoice = new Invoice({
+  id: new Id("1"),
+  name: "Invoice 1",
+  document: "Document 1",
+  address: address,
+  items: items,
+});
 
 const MockRepository = () => {
   return {

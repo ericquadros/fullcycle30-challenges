@@ -2,11 +2,17 @@ import AggregateRoot from "../../@shared/domain/entity/aggregate-root.interface"
 import BaseEntity from "../../@shared/domain/entity/base.entity";
 import Id from "../../@shared/domain/value-object/id.value-object";
 
+export enum TransactionStatus {
+  PENDING = "pending",
+  APPROVED = "approved",
+  DECLINED = "declined"
+}
+
 type TransactionProps = {
   id?: Id;
   amount: number;
   orderId: string;
-  status?: string;
+  status?: TransactionStatus;
   createdAt?: Date;
   updatedAt?: Date;
 };
@@ -14,13 +20,13 @@ type TransactionProps = {
 export default class Transaction extends BaseEntity implements AggregateRoot {
   private _amount: number;
   private _orderId: string;
-  private _status: string;
+  private _status: TransactionStatus;
 
   constructor(props: TransactionProps) {
-    super(props.id);
+    super(props.id, props.createdAt, props.updatedAt);
     this._amount = props.amount;
     this._orderId = props.orderId;
-    this._status = props.status || "pending";
+    this._status = props.status || TransactionStatus.PENDING;
     this.validate();
   }
 
@@ -31,11 +37,11 @@ export default class Transaction extends BaseEntity implements AggregateRoot {
   }
 
   approve(): void {
-    this._status = "approved";
+    this._status = TransactionStatus.APPROVED;
   }
 
   decline(): void {
-    this._status = "declined";
+    this._status = TransactionStatus.DECLINED;
   }
 
   process(): void {

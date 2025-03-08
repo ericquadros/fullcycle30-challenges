@@ -22,12 +22,14 @@ describe("StoreCatalogFacade test", () => {
   });
 
   it("should find a product", async () => {
-    const facade = StoreCatalogFacadeFactory.create();
+    const facade = await StoreCatalogFacadeFactory.create();
+    
     await ProductModel.create({
       id: "1",
       name: "Product 1",
       description: "Description 1",
       purchasePrice: 100,
+      stock: 10,
     });
 
     const result = await facade.find({ id: "1" });
@@ -39,18 +41,22 @@ describe("StoreCatalogFacade test", () => {
   });
 
   it("should find all products", async () => {
-    const facade = StoreCatalogFacadeFactory.create();
+    const facade = await StoreCatalogFacadeFactory.create();
+    
     await ProductModel.create({
       id: "1",
       name: "Product 1",
       description: "Description 1",
       purchasePrice: 100,
+      stock: 10,
     });
+    
     await ProductModel.create({
       id: "2",
       name: "Product 2",
       description: "Description 2",
       purchasePrice: 200,
+      stock: 20,
     });
 
     const result = await facade.findAll();

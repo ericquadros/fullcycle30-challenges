@@ -5,7 +5,6 @@ import InvoiceItems from "../../domain/invoice-items.entity";
 import InvoiceGateway from "../../gateway/invoice.gateway";
 import { GenerateInvoiceUseCaseInputDto, GenerateInvoiceUseCaseOutputDto } from "./generate-invoice.dto";
 
-
 export default class GenerateInvoiceUseCase {
   constructor(private invoiceGateway: InvoiceGateway) {}
 
@@ -22,16 +21,20 @@ export default class GenerateInvoiceUseCase {
     );
 
     const items = input.items.map(
-      (item) => new InvoiceItems(new Id(item.id), item.name, item.price)
+      (item) => new InvoiceItems({
+        id: new Id(item.id),
+        name: item.name,
+        price: item.price,
+      })
     );
 
-    const invoice = new Invoice(
-      new Id(),
-      input.name,
-      input.document,
-      address,
-      items
-    );
+    const invoice = new Invoice({
+      id: input.id ? new Id(input.id) : new Id(),
+      name: input.name,
+      document: input.document,
+      address: address,
+      items: items,
+    });
 
     const result = await this.invoiceGateway.generate(invoice);
 
@@ -39,12 +42,14 @@ export default class GenerateInvoiceUseCase {
       id: result.id.id,
       name: result.name,
       document: result.document,
-      street: result.address.street,
-      number: result.address.number,
-      complement: result.address.complement,
-      city: result.address.city,
-      state: result.address.state,
-      zipCode: result.address.zipCode,
+      address: {
+        street: result.address.street,
+        number: result.address.number,
+        complement: result.address.complement,
+        city: result.address.city,
+        state: result.address.state,
+        zipCode: result.address.zipCode,
+      },
       items: result.items.map((item) => ({
         id: item.id.id,
         name: item.name,

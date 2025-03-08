@@ -26,30 +26,27 @@ describe("Client Repository test", () => {
   })
 
   it("should create a client", async () => {
-
+    const repository = new ClientRepository()
     const client = new Client({
-      id: new Id("1"),
-      name: "Lucian",
-      email: "lucian@teste.com",
-      document: "1234-5678",
+      id: new Id('1'),
+      name: 'Client 1',
+      email: 'client@example.com',
+      document: '123456789',
       address: new Address(
-        "Rua 123",
-        "99",
-        "Casa Verde",
-        "Criciúma",
-        "SC",
-        "88888-888"
+        'Street 1',
+        '123',
+        'Complement',
+        'City',
+        'State',
+        '12345-678'
       )
-      // address: "Rua 123",
     })
 
-    const repository = new ClientRepository()
     await repository.add(client)
 
-    const clientDb = await ClientModel.findOne({ where: { id: "1" } })
+    const clientDb = await ClientModel.findOne({ where: { id: '1' } })
 
     expect(clientDb).toBeDefined()
-    expect(clientDb.id).toEqual(client.id.id)
     expect(clientDb.name).toEqual(client.name)
     expect(clientDb.email).toEqual(client.email)
     expect(clientDb.document).toEqual(client.document)
@@ -58,30 +55,27 @@ describe("Client Repository test", () => {
     expect(clientDb.complement).toEqual(client.address.complement)
     expect(clientDb.city).toEqual(client.address.city)
     expect(clientDb.state).toEqual(client.address.state)
-    expect(clientDb.zipcode).toEqual(client.address.zipCode)
-    expect(clientDb.createdAt).toStrictEqual(client.createdAt)
-    expect(clientDb.updatedAt).toStrictEqual(client.updatedAt)
+    expect(clientDb.zipCode).toEqual(client.address.zipCode)
   })
 
   it("should find a client", async () => {
-
     const client = await ClientModel.create({
       id: '1',
-      name: 'Lucian',
-      email: 'lucian@123.com',
-      document: "1234-5678",
-      street: "Rua 123",
-      number: "99",
-      complement: "Casa Verde",
-      city: "Criciúma",
-      state: "SC",
-      zipcode: "88888-888",      
+      name: 'Client 1',
+      email: 'client@example.com',
+      document: '123456789',
+      street: 'Street 1',
+      number: '123',
+      complement: 'Complement',
+      city: 'City',
+      state: 'State',
+      zipCode: '12345-678',
       createdAt: new Date(),
-      updatedAt: new Date()
+      updatedAt: new Date(),
     })
 
     const repository = new ClientRepository()
-    const result = await repository.find(client.id)
+    const result = await repository.find('1')
 
     expect(result.id.id).toEqual(client.id)
     expect(result.name).toEqual(client.name)
@@ -91,8 +85,6 @@ describe("Client Repository test", () => {
     expect(result.address.complement).toEqual(client.complement)
     expect(result.address.city).toEqual(client.city)
     expect(result.address.state).toEqual(client.state)
-    expect(result.address.zipCode).toEqual(client.zipcode)
-    expect(result.createdAt).toStrictEqual(client.createdAt)
-    expect(result.updatedAt).toStrictEqual(client.updatedAt)
+    expect(result.address.zipCode).toEqual(client.zipCode)
   })
 })

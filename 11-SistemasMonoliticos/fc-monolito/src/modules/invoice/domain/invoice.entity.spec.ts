@@ -15,17 +15,25 @@ describe("Invoice Entity", () => {
     );
 
     const items = [
-      new InvoiceItems(new Id("1"), "Item 1", 100),
-      new InvoiceItems(new Id("2"), "Item 2", 200),
+      new InvoiceItems({
+        id: new Id("1"),
+        name: "Item 1",
+        price: 100,
+      }),
+      new InvoiceItems({
+        id: new Id("2"),
+        name: "Item 2",
+        price: 200,
+      }),
     ];
 
-    const invoice = new Invoice(
-      new Id("123"),
-      "Invoice 1",
-      "Document 1",
-      address,
-      items
-    );
+    const invoice = new Invoice({
+      id: new Id("123"),
+      name: "Invoice 1",
+      document: "Document 1",
+      address: address,
+      items: items,
+    });
 
     expect(invoice.id.id).toBe("123");
     expect(invoice.name).toBe("Invoice 1");

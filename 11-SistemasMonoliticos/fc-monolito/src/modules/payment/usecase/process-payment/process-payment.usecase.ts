@@ -1,11 +1,10 @@
 import UseCaseInterface from "../../../@shared/usecase/use-case.interface";
-import Transaction from "../../domain/transaction";
+import Transaction, { TransactionStatus } from "../../domain/transaction";
 import PaymentGateway from "../../gateway/payment.gateway";
 import {
   ProcessPaymentInputDto,
   ProcessPaymentOutputDto,
 } from "./process-payment.dto";
-import { PaymentStatus } from "../../domain/payment.constants";
 
 export default class ProcessPaymentUseCase implements UseCaseInterface {
   constructor(private transactionRepository: PaymentGateway) {}
@@ -20,7 +19,7 @@ export default class ProcessPaymentUseCase implements UseCaseInterface {
     const transaction = new Transaction({
       amount: input.amount,
       orderId: input.orderId,
-      status: input.amount > 0 ? PaymentStatus.APPROVED : PaymentStatus.DECLINED
+      status: input.amount > 0 ? TransactionStatus.APPROVED : TransactionStatus.DECLINED
     });
 
     console.log('Created transaction:', {

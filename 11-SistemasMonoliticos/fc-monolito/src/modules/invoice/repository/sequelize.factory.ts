@@ -1,23 +1,17 @@
 import { Sequelize } from "sequelize-typescript";
 import { InvoiceModel } from "./invoice.model";
 import InvoiceItemModel from "./invoice-item.model";
+import { SharedSequelizeFactory } from "../../@shared/database/sequelize.factory";
 
 export class InvoiceSequelizeFactory {
-  private static instance: Sequelize;
-
   static async getInstance(): Promise<Sequelize> {
-    if (!this.instance) {
-      this.instance = new Sequelize({
-        dialect: "sqlite",
-        storage: ":memory:",
-        logging: false,
-        sync: { force: true },
-      });
-
-      this.instance.addModels([InvoiceModel, InvoiceItemModel]);
-      await this.instance.sync();
+    const sequelize = await SharedSequelizeFactory.getInstance();
+    
+    if (!sequelize.models.InvoiceModel) {
+      sequelize.addModels([InvoiceModel, InvoiceItemModel]);
+      await sequelize.sync();
     }
-
-    return this.instance;
+    
+    return sequelize;
   }
 } 

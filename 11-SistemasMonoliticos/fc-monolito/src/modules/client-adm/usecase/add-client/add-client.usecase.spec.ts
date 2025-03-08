@@ -3,7 +3,6 @@ import AddClientUseCase from "./add-client.usecase"
 
 const MockRepository = () => {
   return {
-
     add: jest.fn(),
     find: jest.fn()
   }
@@ -20,14 +19,12 @@ describe("Add Client use case unit test", () => {
       name: "Lucian",
       email: "lucian@123.com",
       document: "1234-5678",
-      address: new Address(
-        "Rua 123",
-        "99",
-        "Casa Verde",
-        "Criciúma",
-        "SC",
-        "88888-888",
-      )
+      street: "Rua 123",
+      number: "99",
+      complement: "Casa Verde",
+      city: "Criciúma",
+      state: "SC",
+      zipCode: "88888-888"
     }
 
     const result =  await usecase.execute(input)
@@ -36,7 +33,15 @@ describe("Add Client use case unit test", () => {
     expect(result.id).toBeDefined()
     expect(result.name).toEqual(input.name)
     expect(result.email).toEqual(input.email)
-    expect(result.address).toEqual(input.address)
+    expect(result.document).toEqual(input.document)
+    expect(result.street).toEqual(input.street)
+    expect(result.number).toEqual(input.number)
+    expect(result.complement).toEqual(input.complement)
+    expect(result.city).toEqual(input.city)
+    expect(result.state).toEqual(input.state)
+    expect(result.zipCode).toEqual(input.zipCode)
+    expect(result.createdAt).toBeDefined()
+    expect(result.updatedAt).toBeDefined()
 
   })
 })

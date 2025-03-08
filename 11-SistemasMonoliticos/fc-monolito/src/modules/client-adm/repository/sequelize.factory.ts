@@ -1,22 +1,16 @@
 import { Sequelize } from "sequelize-typescript";
 import { ClientModel } from "./client.model";
+import { SharedSequelizeFactory } from "../../@shared/database/sequelize.factory";
 
 export class ClientAdmSequelizeFactory {
-  private static instance: Sequelize;
-
   static async getInstance(): Promise<Sequelize> {
-    if (!this.instance) {
-      this.instance = new Sequelize({
-        dialect: "sqlite",
-        storage: ":memory:",
-        logging: false,
-        sync: { force: true },
-      });
-
-      this.instance.addModels([ClientModel]);
-      await this.instance.sync();
+    const sequelize = await SharedSequelizeFactory.getInstance();
+    
+    if (!sequelize.models.ClientModel) {
+      sequelize.addModels([ClientModel]);
+      await sequelize.sync();
     }
-
-    return this.instance;
+    
+    return sequelize;
   }
 } 

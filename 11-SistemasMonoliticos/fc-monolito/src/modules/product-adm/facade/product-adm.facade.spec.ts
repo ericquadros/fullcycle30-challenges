@@ -13,7 +13,7 @@ describe("ProductAdmFacade test", () => {
       sync: { force: true },
     });
 
-    await sequelize.addModels([ProductModel]);
+    sequelize.addModels([ProductModel]);
     await sequelize.sync();
   });
 
@@ -22,20 +22,13 @@ describe("ProductAdmFacade test", () => {
   });
 
   it("should create a product", async () => {
-    // const productRepository = new ProductRepository();
-    // const addProductUseCase = new AddProductUseCase(productRepository);
-    // const productFacade = new ProductAdmFacade({
-    //   addUseCase: addProductUseCase,
-    //   stockUseCase: undefined,
-    // });
-
-    const productFacade = ProductAdmFacadeFactory.create();
+    const productFacade = await ProductAdmFacadeFactory.create();
 
     const input = {
       id: "1",
       name: "Product 1",
       description: "Product 1 description",
-      purchasePrice: 10,
+      purchasePrice: 100,
       stock: 10,
     };
 
@@ -51,14 +44,16 @@ describe("ProductAdmFacade test", () => {
   });
 
   it("should check product stock", async () => {
-    const productFacade = ProductAdmFacadeFactory.create();
+    const productFacade = await ProductAdmFacadeFactory.create();
+    
     const input = {
       id: "1",
       name: "Product 1",
       description: "Product 1 description",
-      purchasePrice: 10,
+      purchasePrice: 100,
       stock: 10,
     };
+
     await productFacade.addProduct(input);
 
     const result = await productFacade.checkStock({ productId: "1" });

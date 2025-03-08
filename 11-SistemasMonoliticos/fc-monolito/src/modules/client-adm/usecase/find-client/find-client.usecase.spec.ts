@@ -5,21 +5,20 @@ import FindClientUseCase from "./find-client.usecase"
 
 const client = new Client({
   id: new Id("1"),
-  name: "Lucian",
-  email: "lucian@123.com",
-  document: "1234-5678",
+  name: "Client 1",
+  email: "x@x.com",
+  document: "123456789",
   address: new Address(
     "Rua 123",
     "99",
     "Casa Verde",
     "Criciúma",
     "SC",
-    "88888-888",
+    "88888-888"
   )
 })
 
 const MockRepository = () => {
-
   return {
     add: jest.fn(),
     find: jest.fn().mockReturnValue(Promise.resolve(client))
@@ -27,9 +26,7 @@ const MockRepository = () => {
 }
 
 describe("Find Client use case unit test", () => {
-
   it("should find a client", async () => {
-
     const repository = MockRepository()
     const usecase = new FindClientUseCase(repository)
 
@@ -40,10 +37,15 @@ describe("Find Client use case unit test", () => {
     const result = await usecase.execute(input)
 
     expect(repository.find).toHaveBeenCalled()
-    expect(result.id).toEqual(input.id)
+    expect(result.id).toEqual(client.id.id)
     expect(result.name).toEqual(client.name)
     expect(result.email).toEqual(client.email)
-    expect(result.address).toEqual(client.address)
+    expect(result.street).toEqual(client.address.street)
+    expect(result.number).toEqual(client.address.number)
+    expect(result.complement).toEqual(client.address.complement)
+    expect(result.city).toEqual(client.address.city)
+    expect(result.state).toEqual(client.address.state)
+    expect(result.zipCode).toEqual(client.address.zipCode)
     expect(result.createdAt).toEqual(client.createdAt)
     expect(result.updatedAt).toEqual(client.updatedAt)
   })

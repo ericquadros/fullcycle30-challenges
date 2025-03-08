@@ -82,15 +82,20 @@ export default class PlaceOrderUseCase implements UseCaseInterface {
     if (status === "approved") {
       console.log('Generating invoice for client:', client);
       
+      // Validar campos obrigatórios do endereço
+      if (!client.street || !client.number || !client.city || !client.state || !client.zipCode) {
+        throw new Error("All address fields are required: street, number, city, state, zipCode");
+      }
+      
       const invoice = await this._invoiceFacade.generate({
         name: client.name,
         document: client.document,
-        street: client.street || "",        
-        number: client.number || "",        
-        complement: client.complement || "", 
-        city: client.city || "",           
-        state: client.state || "",         
-        zipCode: client.zipCode || "",     
+        street: client.street,
+        number: client.number,
+        complement: client.complement || "",
+        city: client.city,
+        state: client.state,
+        zipCode: client.zipCode,
         items: products.map((p) => ({
           id: p.productId,
           name: p.name,

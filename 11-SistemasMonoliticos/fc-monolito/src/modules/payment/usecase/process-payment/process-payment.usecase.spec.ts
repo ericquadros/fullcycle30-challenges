@@ -1,12 +1,12 @@
 import Id from "../../../@shared/domain/value-object/id.value-object";
-import Transaction from "../../domain/transaction";
+import Transaction, { TransactionStatus } from "../../domain/transaction";
 import ProcessPaymentUseCase from "./process-payment.usecase";
 
 const transaction = new Transaction({
   id: new Id("1"),
   amount: 100,
   orderId: "1",
-  status: "approved",
+  status: TransactionStatus.APPROVED,
 });
 
 const MockRepository = () => {
@@ -19,7 +19,7 @@ const transaction2 = new Transaction({
   id: new Id("1"),
   amount: 50,
   orderId: "1",
-  status: "declined",
+  status: TransactionStatus.DECLINED,
 });
 
 const MockRepositoryDeclined = () => {
@@ -41,7 +41,7 @@ describe("Process payment usecase unit test", () => {
 
     expect(result.transactionId).toBe(transaction.id.id);
     expect(paymentRepository.save).toHaveBeenCalled();
-    expect(result.status).toBe("approved");
+    expect(result.status).toBe(TransactionStatus.APPROVED);
     expect(result.amount).toBe(100);
     expect(result.orderId).toBe("1");
     expect(result.createdAt).toBe(transaction.createdAt);
@@ -60,7 +60,7 @@ describe("Process payment usecase unit test", () => {
 
     expect(result.transactionId).toBe(transaction2.id.id);
     expect(paymentRepository.save).toHaveBeenCalled();
-    expect(result.status).toBe("declined");
+    expect(result.status).toBe(TransactionStatus.DECLINED);
     expect(result.amount).toBe(50);
     expect(result.orderId).toBe("1");
     expect(result.createdAt).toBe(transaction2.createdAt);

@@ -1,7 +1,6 @@
 import { Sequelize } from "sequelize-typescript";
-// import ProductModel from "./product.model";
 import ProductRepository from "./product.repository";
-import { ProductModel } from "../../product-adm/repository/product.model";
+import StoreCatalogProductModel from "./product.model";
 
 describe("ProductRepository test", () => {
   let sequelize: Sequelize;
@@ -14,7 +13,7 @@ describe("ProductRepository test", () => {
       sync: { force: true },
     });
 
-    await sequelize.addModels([ProductModel]);
+    await sequelize.addModels([StoreCatalogProductModel]);
     await sequelize.sync();
   });
 
@@ -23,18 +22,24 @@ describe("ProductRepository test", () => {
   });
 
   it("should find all products", async () => {
-    await ProductModel.create({
+    await StoreCatalogProductModel.create({
       id: "1",
       name: "Product 1",
       description: "Description 1",
       purchasePrice: 100,
+      stock: 10,
+      createdAt: new Date(),
+      updatedAt: new Date(),
     });
 
-    await ProductModel.create({
+    await StoreCatalogProductModel.create({
       id: "2",
       name: "Product 2",
       description: "Description 2",
       purchasePrice: 200,
+      stock: 20,
+      createdAt: new Date(),
+      updatedAt: new Date(),
     });
 
     const productRepository = new ProductRepository();
@@ -52,11 +57,14 @@ describe("ProductRepository test", () => {
   });
 
   it("should find a product", async () => {
-    await ProductModel.create({
+    await StoreCatalogProductModel.create({
       id: "1",
       name: "Product 1",
       description: "Description 1",
       purchasePrice: 100,
+      stock: 10,
+      createdAt: new Date(),
+      updatedAt: new Date(),
     });
 
     const productRepository = new ProductRepository();

@@ -1,11 +1,33 @@
+@baseUrl = http://localhost:3000
+
+
 ### Buscar todos os produtos
-GET http://localhost:3000/products
+GET {{baseUrl}}/products
 
-### Buscar produto por ID
-GET http://localhost:3000/products/123
 
-### Criar um produto
-POST http://localhost:3000/products
+### Criar um cliente e salvar o ID
+# @name createClient
+POST {{baseUrl}}/clients
+Content-Type: application/json
+
+{
+    "name": "João da Silva",
+    "email": "joao.silva@example.com",
+    "document": "123456789",
+    "street": "Rua das Flores",
+    "number": "123",
+    "complement": "Apto 123",
+    "city": "São Paulo",
+    "state": "SP",
+    "zipCode": "12345-678"
+}
+
+### Salvar o ID do cliente da resposta
+@clientId = {{createClient.response.body.id}}
+
+### Criar um produto e salvar o ID
+# @name createProduct
+POST {{baseUrl}}/products
 Content-Type: application/json
 
 {
@@ -15,35 +37,34 @@ Content-Type: application/json
     "stock": 10
 }
 
-### Criar um cliente
-POST http://localhost:3000/clients
+
+### Salvar o ID do produto da resposta
+@productId = {{createProduct.response.body.id}}
+
+### Buscar todos os produtos
+GET {{baseUrl}}/products
+
+### Buscar produto por ID
+GET {{baseUrl}}/products/{{productId}}
+
+
+### Criar um pedido (checkout) usando os IDs salvos
+# @name createOrder
+POST {{baseUrl}}/checkout
 Content-Type: application/json
 
 {
-    "name": "Client 1",
-    "email": "client@example.com",
-    "document": "123456789",
-    "street": "Street 1",
-    "number": "123",
-    "complement": "Complement",
-    "city": "City",
-    "state": "State",
-    "zipCode": "12345-678"
-}
-
-### Criar um pedido (checkout)
-POST http://localhost:3000/checkout
-Content-Type: application/json
-
-{
-    "clientId": "123",
+    "clientId": "{{clientId}}",
     "products": [
         {
-            "productId": "123",
+            "productId": "{{productId}}",
             "quantity": 1
         }
     ]
 }
 
+### Salvar o ID da invoice da resposta do checkout
+@invoiceId = {{createOrder.response.body.invoiceId}}
+
 ### Buscar invoice por ID
-GET http://localhost:3000/invoice/123 
+GET {{baseUrl}}/invoice/{{invoiceId}} 

@@ -15,6 +15,7 @@ export default class OrderRepository implements CheckoutGateway {
         items: order.items.map(item => ({
           id: item.id.id,
           productId: item.productId,
+          name: item.name,
           quantity: item.quantity,
           price: item.price,
         })),
@@ -30,8 +31,9 @@ export default class OrderRepository implements CheckoutGateway {
           items: order.items.map((item) => ({
             id: item.id.id,
             productId: item.productId,
+            name: item.name,
             quantity: item.quantity,
-            price: item.price || 0,
+            price: item.price,
             orderId: order.id.id,
           })),
         },
@@ -61,13 +63,13 @@ export default class OrderRepository implements CheckoutGateway {
       id: new Id(order.id),
       clientId: order.clientId,
       items: order.items.map(
-        (item) =>
-          new OrderItem({
-            id: new Id(item.id),
-            productId: item.productId,
-            quantity: item.quantity,
-            price: item.price,
-          })
+        (item) => ({
+          id: new Id(item.id),
+          productId: item.productId,
+          name: item.name,
+          quantity: item.quantity,
+          price: item.price,
+        })
       ),
       status: order.status,
       createdAt: order.createdAt,

@@ -32,7 +32,12 @@ describe("Generate Invoice UseCase", () => {
     expect(repository.generate).toHaveBeenCalled();
     expect(result.name).toBe(input.name);
     expect(result.document).toBe(input.document);
-    expect(result.street).toBe(input.street);
+    expect(result.address.street).toBe(input.street);
+    expect(result.address.number).toBe(input.number);
+    expect(result.address.complement).toBe(input.complement);
+    expect(result.address.city).toBe(input.city);
+    expect(result.address.state).toBe(input.state);
+    expect(result.address.zipCode).toBe(input.zipCode);
     expect(result.items).toHaveLength(2);
     expect(result.total).toBe(300);
   });

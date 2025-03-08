@@ -1,4 +1,5 @@
 import { Column, Model, PrimaryKey, Table } from "sequelize-typescript";
+import { TransactionStatus } from "../domain/transaction";
 
 @Table({
   tableName: "transactions",
@@ -15,8 +16,12 @@ export default class TransactionModel extends Model {
   @Column({ allowNull: true })
   declare amount: number;
 
-  @Column({ allowNull: false })
-  declare status: string;
+  @Column({ 
+    allowNull: false,
+    type: 'ENUM',
+    values: Object.values(TransactionStatus)
+  })
+  declare status: TransactionStatus;
 
   @Column({ allowNull: false })
   declare createdAt: Date;

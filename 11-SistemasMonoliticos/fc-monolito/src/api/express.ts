@@ -4,6 +4,7 @@ import ProductAdmFacadeFactory from "../modules/product-adm/factory/facade.facto
 import InvoiceFacadeFactory from "../modules/invoice/factory/invoice.factory";
 import ClientAdmFacadeFactory from "../modules/client-adm/factory/client-adm.facade.factory";
 import { CheckoutFacadeFactory } from "../modules/checkout/factory/checkout.factory";
+import StoreCatalogFacadeFactory from "../modules/store-catalog/factory/facade.factory";
 import { Sequelize } from "sequelize-typescript";
 import { ProductAdmSequelizeFactory } from "../modules/product-adm/repository/sequelize.factory";
 import { StoreCatalogSequelizeFactory } from "../modules/store-catalog/repository/sequelize.factory";
@@ -35,7 +36,7 @@ export const setupApp = async (): Promise<{ app: Express; sequelize: Sequelize }
     console.log('All database connections established');
 
     // Setup routes
-    setupRoutes(app);
+    await setupRoutes(app);
 
     // Retorne a instância compartilhada do Sequelize
     const sequelize = await SharedSequelizeFactory.getInstance();
@@ -47,11 +48,11 @@ export const setupApp = async (): Promise<{ app: Express; sequelize: Sequelize }
   }
 };
 
-function setupRoutes(app: Express) {
-  // Product endpoint
+async function setupRoutes(app: Express) {
+  // Product endpoints
   app.post("/products", async (req: Request, res: Response) => {
     try {
-      const productFacade = ProductFacadeFactory.create();
+      const productFacade = await ProductAdmFacadeFactory.create();
       const output = await productFacade.addProduct(req.body);
       res.status(201).json(output);
     } catch (err) {
@@ -60,10 +61,32 @@ function setupRoutes(app: Express) {
     }
   });
 
+  app.get("/products", async (req: Request, res: Response) => {
+    try {
+      const storeCatalogFacade = await StoreCatalogFacadeFactory.create();
+      const output = await storeCatalogFacade.findAll();
+      res.status(200).json(output);
+    } catch (err) {
+      console.error("Error fetching products:", err);
+      res.status(500).json({ error: (err as Error).message });
+    }
+  });
+
+  app.get("/products/:id", async (req: Request, res: Response) => {
+    try {
+      const storeCatalogFacade = await StoreCatalogFacadeFactory.create();
+      const output = await storeCatalogFacade.find({ id: req.params.id });
+      res.status(200).json(output);
+    } catch (err) {
+      console.error("Error fetching product:", err);
+      res.status(404).json({ error: (err as Error).message });
+    }
+  });
+
   // Client endpoint
   app.post("/clients", async (req: Request, res: Response) => {
     try {
-      const clientFacade = ClientAdmFacadeFactory.create();
+      const clientFacade = await ClientAdmFacadeFactory.create();
       const output = await clientFacade.add(req.body);
       res.status(201).json(output);
     } catch (err) {
@@ -75,19 +98,26 @@ function setupRoutes(app: Express) {
   // Checkout endpoint
   app.post("/checkout", async (req: Request, res: Response) => {
     try {
-      const checkoutFacade = CheckoutFacadeFactory.create();
+      const checkoutFacade = await CheckoutFacadeFactory.create();
       const output = await checkoutFacade.placeOrder(req.body);
       res.status(201).json(output);
     } catch (err) {
       console.error("Error when creating an order:", err);
-      res.status(500).json({ error: (err as Error).message });
+      if ((err as Error).message.includes("Client not found") || 
+          (err as Error).message.includes("Product not found")) {
+        res.status(404).json({ error: (err as Error).message });
+      } else if ((err as Error).message.includes("All address fields are required")) {
+        res.status(400).json({ error: (err as Error).message });
+      } else {
+        res.status(500).json({ error: (err as Error).message });
+      }
     }
   });
 
   // Invoice endpoint
   app.get("/invoice/:id", async (req: Request, res: Response) => {
     try {
-      const invoiceFacade = InvoiceFacadeFactory.create();
+      const invoiceFacade = await InvoiceFacadeFactory.create();
       const output = await invoiceFacade.find({ id: req.params.id });
       res.status(200).json(output);
     } catch (err) {

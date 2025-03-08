@@ -1,4 +1,4 @@
-import Transaction from "../domain/transaction";
+import Transaction, { TransactionStatus } from "../domain/transaction";
 import PaymentGateway from "../gateway/payment.gateway";
 import TransactionModel from "./transaction.model";
 import { PaymentSequelizeFactory } from "./sequelize.factory";
@@ -28,10 +28,10 @@ export default class TransactionRepository implements PaymentGateway {
       console.log('Transaction saved successfully:', transaction.toJSON());
 
       return new Transaction({
-        id: transaction.id,
+        id: new Id(transaction.id),
         orderId: transaction.orderId,
         amount: transaction.amount,
-        status: transaction.status,
+        status: transaction.status as TransactionStatus,
         createdAt: transaction.createdAt,
         updatedAt: transaction.updatedAt,
       });

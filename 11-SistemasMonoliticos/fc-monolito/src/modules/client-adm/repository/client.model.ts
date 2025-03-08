@@ -2,7 +2,7 @@ import { Column, Model, PrimaryKey, Table } from "sequelize-typescript";
 
 @Table({
   tableName: 'client',
-  timestamps: false
+  timestamps: true
 })
 export class ClientModel extends Model {
   @PrimaryKey
@@ -34,11 +34,5 @@ export class ClientModel extends Model {
   state: string
 
   @Column({ allowNull: false })
-  zipcode: string
-
-  @Column({ allowNull: false })
-  createdAt: Date
-
-  @Column({ allowNull: false })
-  updatedAt: Date
+  zipCode: string
 }

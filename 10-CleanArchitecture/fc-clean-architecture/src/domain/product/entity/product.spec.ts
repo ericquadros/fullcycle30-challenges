@@ -73,4 +73,29 @@ describe("Product unit tests", () => {
       }
     }).toThrow(NotificationError);
   });
+
+  it("should have two validation errors at the same time", () => {
+    expect(() => {
+      try {
+        new Product("", "", 100);
+      } catch (error) {
+        expect(error).toBeInstanceOf(NotificationError);
+        const notificationError = error as NotificationError;
+        
+        expect(notificationError.errors).toHaveLength(2);
+        
+        // Verificar se contém os dois erros específicos
+        const errorMessages = notificationError.errors.map(error => error.message);
+        expect(errorMessages).toContain("ID is required");
+        expect(errorMessages).toContain("Name is required");
+
+        // Verificar o contexto dos erros
+        notificationError.errors.forEach(error => {
+          expect(error.context).toBe("product");
+        });
+
+        throw error;
+      }
+    }).toThrow(NotificationError);
+  });
 });

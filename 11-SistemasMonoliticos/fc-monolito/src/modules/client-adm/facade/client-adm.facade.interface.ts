@@ -1,50 +1,11 @@
 import Address from "../../@shared/domain/value-object/address"
+import { AddClientInputDto, AddClientOutputDto } from "../usecase/add-client/add-client.dto";
+import { FindClientUseCaseInputDto, FindClientUseCaseOutputDto } from "../usecase/find-client/find-client.usecase.dto";
 
-export interface AddClientFacadeInputDto {
-  name: string;
-  email: string;
-  document: string;
-  street: string;
-  number: string;
-  complement: string;
-  city: string;
-  state: string;
-  zipCode: string;
-}
-
-export interface AddClientFacadeOutputDto {
-  id: string;
-  name: string;
-  email: string;
-  document: string;
-  street: string;
-  number: string;
-  complement: string;
-  city: string;
-  state: string;
-  zipCode: string;
-  createdAt: Date;
-  updatedAt: Date;
-}
-
-export interface FindClientFacadeInputDto {
-  id: string;
-}
-
-export interface FindClientFacadeOutputDto {
-  id: string;
-  name: string;
-  email: string;
-  document: string;
-  street: string;
-  number: string;
-  complement: string;
-  city: string;
-  state: string;
-  zipCode: string;
-  createdAt: Date;
-  updatedAt: Date;
-}
+export type AddClientFacadeInputDto = AddClientInputDto;
+export type AddClientFacadeOutputDto = AddClientOutputDto;
+export type FindClientFacadeInputDto = FindClientUseCaseInputDto;
+export type FindClientFacadeOutputDto = FindClientUseCaseOutputDto;
 
 export default interface ClientAdmFacadeInterface {
   add(input: AddClientFacadeInputDto): Promise<AddClientFacadeOutputDto>;

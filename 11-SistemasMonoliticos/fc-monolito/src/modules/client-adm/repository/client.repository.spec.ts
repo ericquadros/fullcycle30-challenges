@@ -17,7 +17,7 @@ describe("Client Repository test", () => {
       sync: { force: true }
     })
 
-    sequelize.addModels([ClientModel])
+    await sequelize.addModels([ClientModel])
     await sequelize.sync()
   })
 
@@ -26,7 +26,7 @@ describe("Client Repository test", () => {
   })
 
   it("should create a client", async () => {
-    const repository = new ClientRepository()
+    const repository = new ClientRepository(sequelize)
     const client = new Client({
       id: new Id('1'),
       name: 'Client 1',
@@ -74,7 +74,7 @@ describe("Client Repository test", () => {
       updatedAt: new Date(),
     })
 
-    const repository = new ClientRepository()
+    const repository = new ClientRepository(sequelize)
     const result = await repository.find('1')
 
     expect(result.id.id).toEqual(client.id)

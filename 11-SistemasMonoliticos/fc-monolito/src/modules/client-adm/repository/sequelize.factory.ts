@@ -7,8 +7,10 @@ export class ClientAdmSequelizeFactory {
     const sequelize = await SharedSequelizeFactory.getInstance();
     
     if (!sequelize.models.ClientModel) {
-      sequelize.addModels([ClientModel]);
+      await sequelize.addModels([ClientModel]);
       await sequelize.sync();
+      console.log("Factory - Models:", Object.keys(sequelize.models));
+      console.log("Factory - Tables:", await sequelize.getQueryInterface().showAllTables());
     }
     
     return sequelize;

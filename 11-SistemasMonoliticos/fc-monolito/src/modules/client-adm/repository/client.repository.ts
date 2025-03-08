@@ -13,7 +13,7 @@ export default class ClientRepository implements ClientGateway {
   }
 
   async add(entity: Client): Promise<void> {
-    await ClientModel.create({
+    console.log("Repository - Adding client:", {
       id: entity.id.id,
       name: entity.name,
       email: entity.email,
@@ -26,14 +26,42 @@ export default class ClientRepository implements ClientGateway {
       zipCode: entity.address.zipCode,
       createdAt: entity.createdAt,
       updatedAt: entity.updatedAt
-    })
+    });
+
+    try {
+      await ClientModel.create({
+        id: entity.id.id,
+        name: entity.name,
+        email: entity.email,
+        document: entity.document,
+        street: entity.address.street,
+        number: entity.address.number,
+        complement: entity.address.complement,
+        city: entity.address.city,
+        state: entity.address.state,
+        zipCode: entity.address.zipCode,
+        createdAt: entity.createdAt,
+        updatedAt: entity.updatedAt
+      });
+      console.log("Repository - Client added successfully");
+    } catch (error) {
+      console.error("Repository - Error adding client:", error);
+      throw error;
+    }
   }
 
   async find(id: string): Promise<Client> {
-    const client = await ClientModel.findOne({ where: { id } })
+    console.log("Repository - Finding client with id:", id);
+
+    const client = await ClientModel.findOne({ 
+      where: { id },
+      raw: true
+    });
+
+    console.log("Repository - Found client:", client);
 
     if (!client) {
-      throw new Error("Client not found")
+      throw new Error("Client not found");
     }
 
     return new Client({
@@ -50,7 +78,7 @@ export default class ClientRepository implements ClientGateway {
         client.zipCode,
       ),
       createdAt: client.createdAt,
-      updatedAt: client.createdAt
-    })
+      updatedAt: client.updatedAt
+    });
   }
 }

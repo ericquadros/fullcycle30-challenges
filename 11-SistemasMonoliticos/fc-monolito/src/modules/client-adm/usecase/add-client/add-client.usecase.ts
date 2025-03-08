@@ -13,38 +13,63 @@ export default class AddClientUseCase {
   }
 
   async execute(input: AddClientInputDto): Promise<AddClientOutputDto> {
+    console.log("UseCase - Executing add client with input:", input);
 
-    const props = {
-      id: input.id ? new Id(input.id) : new Id(),
-      name: input.name,
-      email: input.email,
-      document: input.document,
-      address: new Address(
-        input.street,
-        input.number,
-        input.complement,
-        input.city,
-        input.state,
-        input.zipCode
-      ),
-    }
+    try {
+      const props = {
+        id: input.id ? new Id(input.id) : new Id(),
+        name: input.name,
+        email: input.email,
+        document: input.document,
+        address: new Address(
+          input.street,
+          input.number,
+          input.complement,
+          input.city,
+          input.state,
+          input.zipCode
+        ),
+      }
 
-    const client = new Client(props)
-    await this._clientRepository.add(client)
+      console.log("UseCase - Creating client with props:", props);
+      const client = new Client(props)
+      console.log("UseCase - Client created:", {
+        id: client.id.id,
+        name: client.name,
+        email: client.email,
+        document: client.document,
+        address: {
+          street: client.address.street,
+          number: client.address.number,
+          complement: client.address.complement,
+          city: client.address.city,
+          state: client.address.state,
+          zipCode: client.address.zipCode
+        }
+      });
 
-    return {
-      id: client.id.id,
-      name: client.name,
-      email: client.email,
-      document: client.document,
-      street: client.address.street,
-      number: client.address.number,
-      complement: client.address.complement,
-      city: client.address.city,
-      state: client.address.state,
-      zipCode: client.address.zipCode,
-      createdAt: client.createdAt,
-      updatedAt: client.updatedAt
+      await this._clientRepository.add(client)
+      console.log("UseCase - Client added to repository");
+
+      const output = {
+        id: client.id.id,
+        name: client.name,
+        email: client.email,
+        document: client.document,
+        street: client.address.street,
+        number: client.address.number,
+        complement: client.address.complement,
+        city: client.address.city,
+        state: client.address.state,
+        zipCode: client.address.zipCode,
+        createdAt: client.createdAt,
+        updatedAt: client.updatedAt
+      }
+      console.log("UseCase - Returning output:", output);
+      return output;
+    } catch (error) {
+      console.error("UseCase - Error executing add client:", error);
+      throw error;
     }
   }
 }

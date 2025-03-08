@@ -7,6 +7,7 @@ import ClientAdmFacadeFactory from "../factory/client-adm.facade.factory"
 import Address from "../../@shared/domain/value-object/address"
 import { ClientAdmSequelizeFactory } from "../repository/sequelize.factory"
 import FindClientUseCase from "../usecase/find-client/find-client.usecase"
+import { SharedSequelizeFactory } from "../../@shared/database/sequelize.factory"
 
 describe("Client Adm Facade test", () => {
   let sequelize: Sequelize
@@ -16,9 +17,8 @@ describe("Client Adm Facade test", () => {
   let findUseCase: FindClientUseCase
 
   beforeEach(async () => {
-    sequelize = await ClientAdmSequelizeFactory.getInstance()
-    console.log("Sequelize instance:", sequelize.config)
-    await sequelize.sync({ force: true })
+    await SharedSequelizeFactory.resetInstance()
+    sequelize = await ClientAdmSequelizeFactory.getInstance()    
 
     repository = new ClientRepository(sequelize)
     addUseCase = new AddClientUseCase(repository)
@@ -31,7 +31,7 @@ describe("Client Adm Facade test", () => {
   })
 
   afterEach(async () => {
-    await sequelize.sync({ force: true })
+    await SharedSequelizeFactory.resetInstance()
   })
 
   it("should create a client", async () => {
@@ -48,13 +48,12 @@ describe("Client Adm Facade test", () => {
       zipCode: "88888-888"
     }
 
-    console.log("Before adding client")
     await facade.add(input)
-    console.log("After adding client")
 
-    console.log("Before finding client")
-    const client = await ClientModel.findOne({ where: { id: "1" } })
-    console.log("Found client:", client?.toJSON())
+    const client = await ClientModel.findOne({ 
+      where: { id: "1" },
+      raw: true
+    })
 
     expect(client).toBeDefined()
     expect(client.id).toBe(input.id)
@@ -83,13 +82,15 @@ describe("Client Adm Facade test", () => {
       zipCode: "88888-888"
     }
 
-    console.log("Before adding client")
-    await facade.add(input)
-    console.log("After adding client")
+    const result = await facade.add(input)
 
-    console.log("Before finding client")
+    // Verificar se o cliente foi realmente criado
+    const createdClient = await ClientModel.findOne({ 
+      where: { id: "1" },
+      raw: true
+    })
+
     const client = await facade.find({ id: "1" })    
-    console.log("Found client:", client)
 
     expect(client).toBeDefined()
     expect(client.id).toBe(input.id)

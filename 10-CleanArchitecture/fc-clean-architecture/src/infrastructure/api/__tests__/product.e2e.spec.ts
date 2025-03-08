@@ -1,11 +1,7 @@
-import request from "supertest";
-import { Sequelize } from "sequelize-typescript";
-import ProductModel from "../../product/repository/sequelize/product.model";
-import ProductRepository from "../../product/repository/sequelize/product.repository";
-import Product from "../../../domain/product/entity/product";
 import { app, sequelize } from "../express";
+import request from "supertest";
 
-describe("E2E Test for Product Listing", () => {
+describe("E2E test for product", () => {
   beforeEach(async () => {
     await sequelize.sync({ force: true });
   });
@@ -14,25 +10,54 @@ describe("E2E Test for Product Listing", () => {
     await sequelize.close();
   });
 
-
   it("should list all products", async () => {
-    // const productRepository = new ProductRepository();
-    // const product1 = new Product("123", "Product 1", 100);
-    // const product2 = new Product("456", "Product 2", 200);
-    // await productRepository.create(product1);
-    // await productRepository.create(product2);
+    const response1 = await request(app)
+      .post("/product")
+      .send({
+        id: "1",
+        name: "Product 1",
+        price: 100
+      });
+    expect(response1.status).toBe(201);
 
-    // const products = await productRepository.findAll();
-    // console.log(products);
+    const response2 = await request(app)
+      .post("/product")
+      .send({
+        id: "2",
+        name: "Product 2",
+        price: 200
+      });
+    expect(response2.status).toBe(201);
 
-    const response = await request(app).get("/products").send();
+    const listResponse = await request(app)
+      .get("/product")
+      .send();
 
-    expect(response.status).toBe(200);
+    expect(listResponse.status).toBe(200);
+    expect(listResponse.body.products.length).toBe(2);
+    
+    const product = listResponse.body.products[0];
+    expect(product.name).toBe("Product 1");
+    expect(product.price).toBe(100);
+    
+    const product2 = listResponse.body.products[1];
+    expect(product2.name).toBe("Product 2");
+    expect(product2.price).toBe(200);
 
+    const listResponseXML = await request(app)
+      .get("/product")
+      .set("Accept", "application/xml")
+      .send();
 
-    // expect(response.body).toEqual([
-    //   { id: "123", name: "Product 1", price: 100 },
-    //   { id: "456", name: "Product 2", price: 200 },
-    // ]);
+    expect(listResponseXML.status).toBe(200);
+    expect(listResponseXML.text).toContain(`<?xml version="1.0" encoding="UTF-8"?>`);
+    expect(listResponseXML.text).toContain(`<products>`);
+    expect(listResponseXML.text).toContain(`<product>`);
+    expect(listResponseXML.text).toContain(`<name>Product 1</name>`);
+    expect(listResponseXML.text).toContain(`<price>100</price>`);
+    expect(listResponseXML.text).toContain(`</product>`);
+    expect(listResponseXML.text).toContain(`<name>Product 2</name>`);
+    expect(listResponseXML.text).toContain(`<price>200</price>`);
+    expect(listResponseXML.text).toContain(`</products>`);
   });
 }); 

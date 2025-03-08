@@ -38,7 +38,7 @@ describe("Customer events tests", () => {
     eventDispatcher.register("CustomerAddressChangedEvent", eventHandler);
 
     const customer = new Customer("123", "John Doe");
-    const address = new Address("Street", "123", "12345-678", "City");
+    const address = new Address("Street", 123, "12345678", "City");
     customer.changeAddress(address);
 
     expect(spyEventHandler).toHaveBeenCalled();

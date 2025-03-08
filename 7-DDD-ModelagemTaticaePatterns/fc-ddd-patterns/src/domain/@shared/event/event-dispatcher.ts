@@ -1,9 +1,19 @@
 import EventDispatcherInterface from "./event-dispatcher.interface";
 import EventHandlerInterface from "./event-handler.interface";
-import eventInterface from "./event.interface";
+import EventInterface from "./event.interface";
 
 export default class EventDispatcher implements EventDispatcherInterface {
+  private static instance: EventDispatcher | null = null;
   private eventHandlers: { [eventName: string]: EventHandlerInterface[] } = {};
+
+  private constructor() {}
+
+  public static getInstance(): EventDispatcher {
+    if (EventDispatcher.instance === null) {
+      EventDispatcher.instance = new EventDispatcher();
+    }
+    return EventDispatcher.instance;
+  }
 
   get getEventHandlers(): { [eventName: string]: EventHandlerInterface[] } {
     return this.eventHandlers;
@@ -29,7 +39,7 @@ export default class EventDispatcher implements EventDispatcherInterface {
     this.eventHandlers = {};
   }
 
-  notify(event: eventInterface): void {
+  notify(event: EventInterface): void {
     const eventName = event.constructor.name;
     if (this.eventHandlers[eventName]) {
       this.eventHandlers[eventName].forEach((eventHandler) => {

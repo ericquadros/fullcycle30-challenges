@@ -2,8 +2,17 @@ import Order from "../../../../domain/checkout/entity/order";
 import OrderItemModel from "./order-item.model";
 import OrderModel from "./order.model";
 import OrderRepositoryInterface from "../../../../domain/checkout/repository/order-repository.interface";
+import OrderItem from "../../../../domain/checkout/entity/order_item";
 
 export default class OrderRepository implements OrderRepositoryInterface {
+  find(id: string): Promise<Order>
+  {
+    throw new Error("Method not implemented.");
+  }
+  findAll(): Promise<Order[]>
+  {
+    throw new Error("Method not implemented.");
+  }
   async create(entity: Order): Promise<void> {
     await OrderModel.create(
       {
@@ -31,15 +40,15 @@ export default class OrderRepository implements OrderRepositoryInterface {
     const order = new Order(
       orderData.id,
       orderData.customer_id,
-      orderData.total,
-      orderData.items.map((item: any) => ({
-        id: item.id,
-        name: item.name,
-        price: item.price,
-        productId: item.product_id,
-        quantity: item.quantity,
-      }))
-    );
+      orderData.items.map((item: OrderItemModel) => {
+        return new OrderItem(
+          item.id,
+          item.name,
+          item.price,
+          item.product_id,
+          item.quantity
+        )
+      }));
 
     return order;
   }

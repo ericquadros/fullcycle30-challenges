@@ -21,6 +21,20 @@ services:
       timeout: 5s
       retries: 5
 
+  init-data:
+    container_name: eda-init-data
+    image: curlimages/curl:latest
+    volumes:
+      - ./scripts:/scripts
+    entrypoint: ["sh", "/scripts/init-data.sh"]
+    networks:
+      - eda-network
+    depends_on:
+      goapp:
+        condition: service_healthy
+    profiles:
+      - init
+
   mysql:
     image: mysql:5.7
     platform: linux/amd64
@@ -129,8 +143,8 @@ services:
       - POSTGRES_DB=balance_db
     ports:
       - "5432:5432"
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
+    # volumes: # Desabilitado temporariamente para testes
+    #   - postgres_data:/var/lib/postgresql/data
     networks:
       - eda-network
 
@@ -138,16 +152,16 @@ services:
     image: provectuslabs/kafka-ui:latest
     container_name: eda-kafka-ui
     ports:
-      - "8090:8080"
+      - "8080:8080"
+    environment:
+      - KAFKA_CLUSTERS_0_NAME=local
+      - KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS=kafka:29092
     depends_on:
       - kafka
-      - zookeeper
-    environment:
-      KAFKA_CLUSTERS_0_NAME: local
-      KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka:29092
-      KAFKA_CLUSTERS_0_ZOOKEEPER: zookeeper:2181
     networks:
       - eda-network
+    profiles:
+      - monitoring
 
 # Definição da rede
 networks:

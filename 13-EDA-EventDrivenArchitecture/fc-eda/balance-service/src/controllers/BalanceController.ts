@@ -29,6 +29,21 @@ class BalanceController {
     }
   }
 
+  async listBalances(req: Request, res: Response): Promise<Response> {
+    try {
+      const balances = await Balance.findAll({
+        order: [['account_id', 'ASC']]
+      });
+      
+      return res.json(balances);
+    } catch (error) {
+      console.error('Error listing balances:', error);
+      return res.status(500).json({ 
+        error: error instanceof Error ? error.message : 'Internal server error' 
+      });
+    }
+  }
+
   async updateBalance(accountId: string, amount: number): Promise<IBalance> {
     try {
       const [balance] = await Balance.upsert({

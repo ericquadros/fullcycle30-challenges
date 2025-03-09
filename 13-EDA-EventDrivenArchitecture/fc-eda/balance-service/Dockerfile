@@ -7,6 +7,9 @@ RUN npm install
 
 COPY . .
 
+RUN chmod +x src/scripts/start.sh
+
 EXPOSE 3003
 
-CMD ["npm", "run", "dev"]
+CMD ["./src/scripts/start.sh"]
+# CMD ["npm", "run", "dev"]

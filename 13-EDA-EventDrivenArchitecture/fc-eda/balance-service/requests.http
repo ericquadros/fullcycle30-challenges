@@ -1,0 +1,12 @@
+### List all balances
+GET http://localhost:3003/balances 
+# Ajustar
+
+### Get balance for test account 1
+GET http://localhost:3003/balances/test-account-1
+
+### Get balance for test account 2
+GET http://localhost:3003/balances/test-account-2
+
+### Get balance for a specific account (replace with actual account ID)
+GET http://localhost:3003/balances/{{account_id}}

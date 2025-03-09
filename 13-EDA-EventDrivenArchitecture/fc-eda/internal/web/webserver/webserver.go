@@ -8,27 +8,31 @@ import (
 )
 
 type WebServer struct {
-    Router chi.Router
-    Handlers map[string]http.HandlerFunc
-    WebServerPort string
+	Router        chi.Router
+	WebServerPort string
 }
 
 func NewWebServer(webServerPort string) *WebServer {
-    return &WebServer{
-        Router: chi.NewRouter(),
-        Handlers: make(map[string]http.HandlerFunc),
-        WebServerPort: webServerPort,
-    }
+	router := chi.NewRouter()
+	// Adicionar middleware logo após criar o router
+	router.Use(middleware.Logger)
+	
+	return &WebServer{
+		Router:        router,
+		WebServerPort: webServerPort,
+	}
 }
 
 func (s *WebServer) AddHandler(path string, handler http.HandlerFunc) {
-    s.Handlers[path] = handler
+	s.Router.Post(path, handler)
 }
 
 func (s *WebServer) Start() {
-    s.Router.Use(middleware.Logger)
-    for path, handler := range s.Handlers {
-        s.Router.Post(path, handler)
-    }
-    http.ListenAndServe(s.WebServerPort, s.Router)
+	// Add health check endpoint
+	s.Router.Get("/health", func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusOK)
+		w.Write([]byte("healthy"))
+	})
+	
+	http.ListenAndServe(s.WebServerPort, s.Router)
 }

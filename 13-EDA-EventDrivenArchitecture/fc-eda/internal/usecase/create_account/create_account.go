@@ -6,11 +6,13 @@ import (
 )
 
 type CreateAccountInputDTO struct {
-	ClientID string `json:"client_id"`
+	ClientID      string  `json:"client_id"`
+	InitialBalance float64 `json:"initial_balance"`
 }
 
 type CreateAccountOutputDTO struct {
-	ID string
+	ID      string  `json:"id"`
+	Balance float64 `json:"balance"`
 }
 
 type CreateAccountUseCase struct {
@@ -31,12 +33,16 @@ func (uc *CreateAccountUseCase) Execute(input CreateAccountInputDTO) (*CreateAcc
 		return nil, err
 	}
 	account := entity.NewAccount(client)
+	if input.InitialBalance > 0 {
+		account.Credit(input.InitialBalance)
+	}
 	err = uc.AccountGateway.Save(account)
 	if err != nil {
 		return nil, err
 	}
 	output := &CreateAccountOutputDTO{
-		ID: account.ID,
+		ID:      account.ID,
+		Balance: account.Balance,
 	}
 	return output, nil
 }

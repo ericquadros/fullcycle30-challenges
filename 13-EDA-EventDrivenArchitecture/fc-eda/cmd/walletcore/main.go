@@ -27,6 +27,21 @@ func main() {
 	}
 	defer db.Close()
 
+	// Verify database connection
+	err = db.Ping()
+	if err != nil {
+		panic(fmt.Errorf("error connecting to the database: %v", err))
+	}
+	fmt.Println("Successfully connected to database")
+
+	// Check if tables exist
+	var tableCount int
+	err = db.QueryRow("SELECT COUNT(*) FROM information_schema.tables WHERE table_schema = 'wallet' AND table_name IN ('clients', 'accounts', 'transactions')").Scan(&tableCount)
+	if err != nil {
+		panic(fmt.Errorf("error checking tables: %v", err))
+	}
+	fmt.Printf("Found %d of 3 required tables\n", tableCount)
+
 	configMap := ckafka.ConfigMap{
 		"bootstrap.servers": "kafka:29092",
 		"group.id":          "wallet",
@@ -61,12 +76,11 @@ func main() {
 	clientHandler := web.NewWebClientHandler(*createClientUseCase)
 	accountHandler := web.NewWebAccountHandler(*createAccountUseCase)
 	transactionHandler := web.NewWebTransactionHandler(*createTransactionUseCase)
-	healthHandler := web.NewWebHealthHandler(db, &configMap)
 
 	webserver.AddHandler("/clients", clientHandler.CreateClient)
 	webserver.AddHandler("/accounts", accountHandler.CreateAccount)
+	webserver.AddHandler("/accounts/", accountHandler.HandleAccount)
 	webserver.AddHandler("/transactions", transactionHandler.CreateTransaction)
-	webserver.AddHandler("/health", healthHandler.HealthCheck)
 
 	fmt.Println("Server is running")
 	webserver.Start()

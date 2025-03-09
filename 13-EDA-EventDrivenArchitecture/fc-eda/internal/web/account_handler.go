@@ -7,22 +7,19 @@ import (
 	"strings"
 
 	"github.com.br/devfullcycle/fc-ms-wallet/internal/usecase/create_account"
-	"github.com.br/devfullcycle/fc-ms-wallet/internal/usecase/manage_account"
 )
 
 type WebAccountHandler struct {
 	CreateAccountUseCase create_account.CreateAccountUseCase
-	ManageAccountUseCase manage_account.ManageAccountUseCase
 }
 
 type CreditAccountInput struct {
 	Amount float64 `json:"amount"`
 }
 
-func NewWebAccountHandler(createAccountUseCase create_account.CreateAccountUseCase, manageAccountUseCase manage_account.ManageAccountUseCase) *WebAccountHandler {
+func NewWebAccountHandler(createAccountUseCase create_account.CreateAccountUseCase) *WebAccountHandler {
 	return &WebAccountHandler{
 		CreateAccountUseCase: createAccountUseCase,
-		ManageAccountUseCase: manageAccountUseCase,
 	}
 }
 
@@ -92,18 +89,8 @@ func (h *WebAccountHandler) handleCredit(w http.ResponseWriter, r *http.Request,
 		return
 	}
 
-	output, err := h.ManageAccountUseCase.Credit(manage_account.ManageAccountInputDTO{
-		AccountID: accountID,
-		Amount:    input.Amount,
-	})
-	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		json.NewEncoder(w).Encode(map[string]string{"error": err.Error()})
-		return
-	}
-
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(output)
+	w.WriteHeader(http.StatusNotImplemented)
+	json.NewEncoder(w).Encode(map[string]string{"error": "credit operation not implemented yet"})
 }
 
 func (h *WebAccountHandler) handleBalance(w http.ResponseWriter, r *http.Request, accountID string) {
@@ -112,13 +99,6 @@ func (h *WebAccountHandler) handleBalance(w http.ResponseWriter, r *http.Request
 		return
 	}
 
-	output, err := h.ManageAccountUseCase.GetBalance(accountID)
-	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		json.NewEncoder(w).Encode(map[string]string{"error": err.Error()})
-		return
-	}
-
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(output)
+	w.WriteHeader(http.StatusNotImplemented)
+	json.NewEncoder(w).Encode(map[string]string{"error": "balance check not implemented yet"})
 }

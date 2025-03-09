@@ -3,10 +3,10 @@ GET http://localhost:3003/balances
 # Ajustar
 
 ### Get balance for test account 1
-GET http://localhost:3003/balances/test-account-1
+GET http://localhost:3003/balances/8f4b2c9d-5a3e-4c1f-9d6b-8e7f2a1b3c4d
 
 ### Get balance for test account 2
-GET http://localhost:3003/balances/test-account-2
+GET http://localhost:3003/balances/7a1b3c4d-9e8f-4a2b-8c7d-6e5f4d3a2b1c
 
 ### Get balance for a specific account (replace with actual account ID)
 GET http://localhost:3003/balances/{{account_id}}

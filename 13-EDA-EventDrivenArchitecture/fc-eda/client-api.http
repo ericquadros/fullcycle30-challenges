@@ -16,19 +16,28 @@ Content-Type: application/json
 # Salvar o ID do primeiro cliente
 @clientId1 = {{createClient1.response.body.ID}}
 
+### 
+# Debug - Mostrar ID do primeiro cliente
+# Client 1 ID: {{clientId1}}
+
 ###
 # @name createAccount1
-# Criar a conta para o primeiro cliente (John Doe)
+# Criar a conta para o primeiro cliente (John Doe) com saldo inicial de 2000
 POST http://localhost:8085/accounts HTTP/1.1
 Content-Type: application/json
 
 {
-    "client_id": "{{clientId1}}"
+    "client_id": "{{clientId1}}",
+    "initial_balance": 2000
 }
 
 ###
 # Salvar o ID da conta do primeiro cliente
-@accountId1 = {{createAccount1.response.body.ID}}
+@accountId1 = {{createAccount1.response.body.id}}
+
+### 
+# Debug - Mostrar ID da primeira conta
+# Account 1 ID: {{accountId1}}
 
 ###
 # @name createClient2
@@ -45,23 +54,39 @@ Content-Type: application/json
 # Salvar o ID do segundo cliente
 @clientId2 = {{createClient2.response.body.ID}}
 
+### 
+# Debug - Mostrar ID do segundo cliente
+# Client 2 ID: {{clientId2}}
+
 ###
 # @name createAccount2
-# Criar a conta para o segundo cliente (Jane Doe)
+# Criar a conta para o segundo cliente (Jane Doe) com saldo inicial de 1500
 POST http://localhost:8085/accounts HTTP/1.1
 Content-Type: application/json
 
 {
-    "client_id": "{{clientId2}}"
+    "client_id": "{{clientId2}}",
+    "initial_balance": 1500
 }
 
 ###
 # Salvar o ID da conta do segundo cliente
-@accountId2 = {{createAccount2.response.body.ID}}
+@accountId2 = {{createAccount2.response.body.id}}
+
+### 
+# Debug - Mostrar ID da segunda conta
+# Account 2 ID: {{accountId2}}
+
+###
+# Debug - Resumo dos IDs antes da transação
+# Client 1 ID: {{clientId1}}
+# Account 1 ID: {{accountId1}}
+# Client 2 ID: {{clientId2}}
+# Account 2 ID: {{accountId2}}
 
 ###
 # Realizar uma transação entre as contas dos dois clientes
-# Transferir 100 da conta do John Doe para a conta da Jane Doe
+# Transferir 100 da conta do John Doe para a conta da Jane Wasley
 POST http://localhost:8085/transactions HTTP/1.1
 Content-Type: application/json
 
@@ -69,4 +94,16 @@ Content-Type: application/json
     "account_id_from": "{{accountId1}}",
     "account_id_to": "{{accountId2}}",
     "amount": 100
+}
+
+###
+# Realizar uma transação entre as contas dos dois clientes
+# Transferir 300 da conta do John Doe para a conta da Jane Wasley
+POST http://localhost:8085/transactions HTTP/1.1
+Content-Type: application/json
+
+{
+    "account_id_from": "{{accountId1}}",
+    "account_id_to": "{{accountId2}}",
+    "amount": 300
 }

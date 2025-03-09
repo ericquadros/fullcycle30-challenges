@@ -97,6 +97,8 @@ services:
       PORT: 9021
     networks:
       - eda-network
+    profiles:
+      - monitoring
 
   balance-service:
     build: ./balance-service

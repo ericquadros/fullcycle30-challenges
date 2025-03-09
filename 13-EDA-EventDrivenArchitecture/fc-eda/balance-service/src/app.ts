@@ -2,7 +2,7 @@ import express, { Express } from 'express';
 import { Kafka, Consumer, KafkaMessage } from 'kafkajs';
 import balanceRoutes from './routes/balance';
 import balanceController from './controllers/BalanceController';
-import sequelize from './config/database';
+import sequelize from './config/sequelize';
 
 const app: Express = express();
 const port: number = Number(process.env.PORT) || 3003;

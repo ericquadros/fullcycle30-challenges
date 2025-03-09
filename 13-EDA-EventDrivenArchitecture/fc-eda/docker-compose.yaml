@@ -112,6 +112,11 @@ services:
       - DATABASE_URL=postgres://user:password@postgres:5432/balance_db
       - KAFKA_BROKERS=kafka:29092
       - PORT=3003
+      - DB_NAME=balance_db
+      - DB_USER=user
+      - DB_PASSWORD=password
+      - DB_HOST=postgres
+      - DB_PORT=5432
     networks:
       - eda-network
 

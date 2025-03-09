@@ -1,5 +1,5 @@
 import { Model, DataTypes, Optional } from 'sequelize';
-import sequelize from '../config/database';
+import sequelize from '../config/sequelize';
 
 // Interface para os atributos do Balance
 interface BalanceAttributes {
@@ -60,6 +60,7 @@ Balance.init(
     modelName: 'Balance',
     tableName: 'balances',
     timestamps: true,
+    underscored: true,
   }
 );
 

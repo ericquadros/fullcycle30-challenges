@@ -3,6 +3,19 @@
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
   async up(queryInterface, Sequelize) {
+    // Check if there are any existing balances, to avoid duplicate data and errorss
+    const existingBalances = await queryInterface.sequelize.query(
+      'SELECT COUNT(1) as count FROM balances;',
+      { type: Sequelize.QueryTypes.SELECT }
+    );
+
+    // If there are any balances, skip seeding
+    if (existingBalances[0].count > 0) {
+      console.log('💡 Balances table already has data, skipping seeds');
+      return;
+    }
+
+    console.log('🌱 Inserting initial balances...');
     await queryInterface.bulkInsert('balances', [
       {
         account_id: '8f4b2c9d-5a3e-4c1f-9d6b-8e7f2a1b3c4d',
@@ -17,6 +30,7 @@ module.exports = {
         updated_at: new Date()
       }
     ], {});
+    console.log('✅ Initial balances inserted successfully');
   },
 
   async down(queryInterface, Sequelize) {

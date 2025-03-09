@@ -10,3 +10,9 @@ GET http://localhost:3003/balances/7a1b3c4d-9e8f-4a2b-8c7d-6e5f4d3a2b1c
 
 ### Get balance for a specific account (replace with actual account ID)
 GET http://localhost:3003/balances/{{account_id}}
+
+
+### Meus testes - Eric
+GET http://localhost:3003/balances/50253236-0778-477d-96fb-23253aff76e7
+
+

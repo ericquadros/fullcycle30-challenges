@@ -44,7 +44,8 @@ class BalanceController {
     }
   }
 
-  async updateBalance(accountId: string, amount: number): Promise<IBalance> {
+  // Private method - only used internally by Kafka event handlers
+  private async updateBalance(accountId: string, amount: number): Promise<IBalance> {
     try {
       const [balance] = await Balance.upsert({
         account_id: accountId,
@@ -54,6 +55,17 @@ class BalanceController {
       return balance;
     } catch (error) {
       console.error('Error updating balance:', error);
+      throw error;
+    }
+  }
+
+  // Internal method for Kafka consumer
+  async handleBalanceUpdated(accountId: string, amount: number): Promise<void> {
+    try {
+      await this.updateBalance(accountId, amount);
+      console.log(`✅ Balance updated for account ${accountId}: ${amount}`);
+    } catch (error) {
+      console.error(`❌ Failed to update balance for account ${accountId}:`, error);
       throw error;
     }
   }

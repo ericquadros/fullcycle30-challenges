@@ -1,61 +1,213 @@
 # Event-Driven Architecture Challenge
 
-## Como Rodar o Projeto
+Este projeto demonstra uma arquitetura orientada a eventos (EDA) com dois microsserviços:
+- **Wallet Core Service** (Go): Gerencia transações e carteiras
+- **Balance Service** (Node.js/TypeScript): Mantém saldos atualizados via eventos Kafka
 
-### Pré-requisitos
+## Arquitetura
+
+```mermaid
+graph LR
+    A[Wallet Core] -->|Publica Eventos| B[Kafka]
+    B -->|Consome Eventos| C[Balance Service]
+    A -->|Persiste| D[(MySQL)]
+    C -->|Persiste| E[(PostgreSQL)]
+```
+
+## Pré-requisitos
+
 - Docker
 - Docker Compose
+- Porta 8085 (Wallet API)
+- Porta 3003 (Balance API)
+- Porta 8080 (Kafka UI)
 
-### Iniciando os Serviços
+## Iniciando o Projeto
 
-1. Na pasta `13-EDA-EventDrivenArchitecture/fc-eda`, execute o comando:
+1. Clone o repositório
+2. Navegue até a pasta do projeto:
 ```bash
-docker compose up -d
+cd 13-EDA-EventDrivenArchitecture/fc-eda
 ```
 
-O parâmetro `-d` (detached mode) permite que os containers rodem em background, liberando o terminal para outros comandos.
-
-Este comando irá iniciar todos os serviços necessários:
-- Wallet Core Service (Go)
-- Balance Service (Node.js/TypeScript)
-- Kafka
-- Zookeeper
-- MySQL (Wallet Core Database)
-- PostgreSQL (Balance Service Database)
-- Kafka UI
-
-### Monitoramento Kafka
-
-Você pode acessar a interface do Kafka UI em:
-```
-http://localhost:8090
+3. Inicie os serviços com dados iniciais:
+```bash
+docker compose --profile init up -d
 ```
 
-Esta ferramenta permite visualizar:
-- Tópicos Kafka
-- Produtores e Consumidores
-- Mensagens em tempo real
-- Métricas e configurações
+Este comando inicia:
+- 🔷 Wallet Core Service (Go)
+- 🔶 Balance Service (Node.js)
+- 📬 Kafka & Zookeeper
+- 🗄️ MySQL (Wallet Database)
+- 🗃️ PostgreSQL (Balance Database)
+- 📊 Kafka UI
+- 🔧 Container de inicialização (cria dados de teste)
 
-### Endpoints Disponíveis
+## Monitorando a Inicialização
 
-#### Balance Service (porta 3003)
+### Logs do Container de Inicialização
+```bash
+docker logs -f eda-init-data
+```
+Você verá a criação de:
+- Clientes
+- Contas
+- Transações iniciais
+
+### Interface Kafka
+Acesse: http://localhost:8080
+
+Funcionalidades:
+- Visualização de tópicos
+- Monitoramento de produtores/consumidores
+- Inspeção de mensagens
+- Métricas em tempo real
+
+## APIs Disponíveis
+
+### Balance Service (porta 3003)
+
+#### Listar Todos os Saldos
 ```http
-# Listar todas as contas e seus saldos
 GET http://localhost:3003/balances
+```
+Resposta:
+```json
+[
+  {
+    "account_id": "8f4b2c9d-5a3e-4c1f-9d6b-8e7f2a1b3c4d",
+    "amount": 1236.70
+  }
+]
+```
 
-# Consultar saldo de uma conta específica
+#### Consultar Saldo Específico
+```http
 GET http://localhost:3003/balances/{account_id}
 ```
-
-#### Wallet Core (porta 8080)
-```http
-# Criar uma carteira
-POST http://localhost:8080/wallets
-
-# Realizar uma transação
-POST http://localhost:8080/transactions
+Resposta:
+```json
+{
+  "account_id": "8f4b2c9d-5a3e-4c1f-9d6b-8e7f2a1b3c4d",
+  "amount": 1236.70
+}
 ```
+
+### Wallet Core (porta 8085)
+
+#### Criar Cliente
+```http
+POST http://localhost:8085/clients
+Content-Type: application/json
+
+{
+    "name": "John Doe",
+    "email": "john@example.com"
+}
+```
+
+#### Criar Conta
+```http
+POST http://localhost:8085/accounts
+Content-Type: application/json
+
+{
+    "client_id": "{client_id}",
+    "initial_balance": 1000
+}
+```
+
+#### Realizar Transação
+```http
+POST http://localhost:8085/transactions
+Content-Type: application/json
+
+{
+    "account_id_from": "{account_id_from}",
+    "account_id_to": "{account_id_to}",
+    "amount": 100
+}
+```
+
+## Eventos Kafka
+
+O sistema utiliza dois tópicos principais:
+
+### 1. transactions
+Formato da mensagem:
+```json
+{
+  "Name": "TransactionCreated",
+  "Payload": {
+    "id": "e835e812-de81-46ec-8ab6-4d14f906d5bb",
+    "account_id_from": "8161a587-ec22-4bf8-9c9b-1eea762298e1",
+    "account_id_to": "50253236-0778-477d-96fb-23253aff76e7",
+    "amount": 100
+  }
+}
+```
+
+### 2. balances
+Formato da mensagem:
+```json
+{
+  "Name": "BalanceUpdated",
+  "Payload": {
+    "account_id_from": "8161a587-ec22-4bf8-9c9b-1eea762298e1",
+    "account_id_to": "50253236-0778-477d-96fb-23253aff76e7",
+    "balance_account_id_from": 1900,
+    "balance_account_id_to": 1600
+  }
+}
+```
+
+## Desenvolvimento
+
+### Estrutura do Projeto
+```
+.
+├── balance-service/       # Serviço de Saldos (Node.js)
+│   ├── src/
+│   ├── scripts/
+│   └── Dockerfile
+├── internal/             # Código Go do Wallet Core
+├── pkg/                  # Pacotes compartilhados Go
+├── sql/                 # Migrações SQL
+└── docker-compose.yaml  # Configuração dos serviços
+```
+
+### Fluxo de Dados
+1. Usuário cria transação via Wallet Core
+2. Wallet Core publica eventos
+3. Balance Service consome eventos
+4. Saldos são atualizados automaticamente
+5. Consultas disponíveis via API REST
+
+## Troubleshooting
+
+### Logs dos Serviços
+```bash
+# Balance Service
+docker logs -f eda-balance-service
+
+# Wallet Core
+docker logs -f eda-goapp
+
+# Kafka
+docker logs -f eda-kafka
+```
+
+### Reiniciando Serviços
+```bash
+# Reiniciar tudo
+docker compose down
+docker compose --profile init up -d
+
+# Reiniciar serviço específico
+docker compose restart balance-service
+``` 
+
 
 ## Descrição do Desafio
 

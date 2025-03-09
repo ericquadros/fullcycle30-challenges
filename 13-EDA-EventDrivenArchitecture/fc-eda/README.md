@@ -55,6 +55,17 @@ Você verá a criação de:
 - Contas
 - Transações iniciais
 
+### Logs do Balance Service
+```bash
+docker logs -f eda-balance-service
+```
+Você verá:
+- Conexão com o Kafka estabelecida
+- Eventos recebidos e processados
+- Atualizações de saldo
+- Logs de requisições HTTP
+- Status das migrações do banco de dados
+
 ### Interface Kafka
 Acesse: http://localhost:8080
 
@@ -65,6 +76,10 @@ Funcionalidades:
 - Métricas em tempo real
 
 ## APIs Disponíveis
+
+Arquivos de teste das APIs:
+- [Wallet Core API Client](./wallet-core/wallet-core-client-api.http)
+- [Balance Service API Client](./balance-service/balance-service-client-api.http)
 
 ### Balance Service (porta 3003)
 

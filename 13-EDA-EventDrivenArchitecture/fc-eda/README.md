@@ -67,7 +67,7 @@ Você verá:
 - Status das migrações do banco de dados
 
 ### Interface Kafka
-Acesse: http://localhost:8080
+Acesse: http://localhost:8090/ui/clusters/local/all-topics?perPage=25
 
 Funcionalidades:
 - Visualização de tópicos

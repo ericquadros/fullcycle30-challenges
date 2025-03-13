@@ -99,7 +99,7 @@ export default class PlaceOrderUseCase implements UseCaseInterface {
         items: products.map((p) => ({
           id: p.productId,
           name: p.name,
-          price: p.price,
+          price: p.price * p.quantity,
         })),
       });
       

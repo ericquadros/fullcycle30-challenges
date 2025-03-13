@@ -20,7 +20,7 @@ graph LR
 - Docker Compose
 - Porta 8085 (Wallet API)
 - Porta 3003 (Balance API)
-- Porta 8080 (Kafka UI)
+- Porta 8090 (Kafka UI)
 
 ## Iniciando o Projeto
 
